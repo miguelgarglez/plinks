@@ -308,7 +308,6 @@ body {
   .machine { margin-top: 10px; }
   .deck-feed { padding: 8px 14px 10px; }
   .rail { padding: 8px 10px 7px; }
-  .slot { padding-top: 9px; padding-bottom: 9px; }
   .score { height: 69px; }
 }
 .score-rule {
@@ -1135,6 +1134,7 @@ body {
 @media (max-width: 560px) {
   .score-caption { font-size: 12px; letter-spacing: 0.08em; }
   .score-hint { font-size: 12px; letter-spacing: 0.1em; }
+  .slot { padding-top: 9px; padding-bottom: 9px; }
   .plunger-cap { min-height: 50px; }
   .deck-foot .deck-spec { font-size: 8.5px; letter-spacing: 0.14em; }
   .share-plate { padding: 26px 18px 18px; }

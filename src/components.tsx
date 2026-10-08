@@ -45,54 +45,95 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
   const scrubbing = useRef(false);
   const [scrubX, setScrubX] = useState<number | null>(null);
   const rungAt = useRef(new Map<number, number>());
+  const lastClient = useRef<{ x: number; y: number } | null>(null);
+  // while the press began on a dot, only that note has rung; a drag of
+  // more than a few px graduates the gesture into a proximity scrub
+  const downDot = useRef<{ x: number; y: number } | null>(null);
+  const strip = useRef<HTMLDivElement>(null);
 
-  // drag across the rail: every note under the thumb rings as you pass it
-  const scrubTo = (e: React.PointerEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const fx = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-    const now = performance.now();
+  const playableNow = (ev: DropResult['events'][number]) =>
+    pb.phase === 'settled' || ev.t <= revealed + 0.001;
+  const ring = (i: number, now = performance.now()) => {
+    if (!playableNow(evs[i])) return false;
+    if ((rungAt.current.get(i) ?? -9e3) >= now - 220) return false;
+    rungAt.current.set(i, now);
+    audioEngine.setKit(song.kit);
+    pb.ping(evs[i].pegId, evs[i].midi, 0.8);
+    return true;
+  };
+
+  // every note under the pointer x rings as it passes
+  const scrubAt = (clientX: number) => {
+    const inner = strip.current?.firstElementChild as HTMLElement | null;
+    if (!inner) return;
+    const rect = inner.getBoundingClientRect();
+    const fx = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
     let hit = false;
     evs.forEach((ev, i) => {
-      if (!(pb.phase === 'settled' || ev.t <= revealed + 0.001)) return;
       const ex = 2 + (ev.t / Math.max(lastT, 0.001)) * 96;
-      if (Math.abs(ex - fx) < 2.4 && (rungAt.current.get(i) ?? -9e3) < now - 220) {
-        rungAt.current.set(i, now);
-        audioEngine.setKit(song.kit);
-        pb.ping(ev.pegId, ev.midi, 0.8);
-        hit = true;
-      }
+      if (Math.abs(ex - fx) < 2.4 && ring(i)) hit = true;
     });
     if (hit) onScrub();
     setScrubX(fx);
-    // hugging an edge glides the paper along, so the whole strip stays
-    // reachable even though the inner run is wider than the window
-    const rail = strip.current;
-    if (rail) {
-      const rr = rail.getBoundingClientRect();
-      const edge = 34;
-      if (e.clientX < rr.left + edge) rail.scrollLeft -= 26;
-      else if (e.clientX > rr.right - edge) rail.scrollLeft += 26;
-    }
   };
 
+  // while scrubbing near an edge the paper keeps gliding on its own
+  const scrubAtRef = useRef(scrubAt);
+  scrubAtRef.current = scrubAt;
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      const rail = strip.current;
+      const lc = lastClient.current;
+      if (rail && lc && scrubbing.current) {
+        const rr = rail.getBoundingClientRect();
+        const edge = 36;
+        if (lc.x < rr.left + edge || lc.x > rr.right - edge) {
+          rail.scrollLeft += lc.x < rr.left + edge ? -3.4 : 3.4;
+          if (!downDot.current) scrubAtRef.current(lc.x);
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   const scrubDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // a drag that begins on a dot is a scrub too — the note under the
-    // finger rings from scrubTo, so tap-to-play survives on its own
+    // a press that begins on a dot rings exactly that note; the button's
+    // own click is captured away by the strip, so ring on down instead
     audioEngine.unlock();
     scrubbing.current = true;
+    lastClient.current = { x: e.clientX, y: e.clientY };
     e.currentTarget.setPointerCapture(e.pointerId);
-    scrubTo(e);
+    const dotEl = (e.target as HTMLElement).closest('.score-dot');
+    const ix = dotEl ? Number((dotEl as HTMLElement).dataset.i) : NaN;
+    if (Number.isInteger(ix) && evs[ix]) {
+      downDot.current = { x: e.clientX, y: e.clientY };
+      if (ring(ix)) onScrub();
+      setScrubX(2 + (evs[ix].t / Math.max(lastT, 0.001)) * 96);
+    } else {
+      downDot.current = null;
+      scrubAt(e.clientX);
+    }
   };
   const scrubMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!scrubbing.current) return;
-    scrubTo(e);
+    lastClient.current = { x: e.clientX, y: e.clientY };
+    const d = downDot.current;
+    if (d) {
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) return;
+      downDot.current = null; // enough travel — this is a scrub now
+    }
+    scrubAt(e.clientX);
   };
   const scrubEnd = () => {
     scrubbing.current = false;
+    downDot.current = null;
+    lastClient.current = null;
     setScrubX(null);
   };
 
-  const strip = useRef<HTMLDivElement>(null);
   const [canScroll, setCanScroll] = useState(false);
   useEffect(() => {
     const el = strip.current;
@@ -169,6 +210,7 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
           <button
             key={i}
             tabIndex={-1}
+            data-i={i}
             className={`score-dot${e.pegId === -1 ? ' score-dot-tonic' : ''}${on ? ' on' : ''}`}
             style={{ left: `${x}%`, top: `${y}%`, '--dot-color': e.pegId === -1 ? '#E4573C' : ramp(u) } as React.CSSProperties}
             onClick={() => {
