@@ -1038,6 +1038,8 @@ body {
 /* domed brass replay key — part of the machine, not a web pill */
 .replay-key {
   pointer-events: auto;
+  /* sits on the scrolling tape; auto touch-action pans the paper and cancels the pointer */
+  touch-action: none;
   font-family: "Space Mono", monospace;
   font-size: 9.5px;
   letter-spacing: 0.16em;
