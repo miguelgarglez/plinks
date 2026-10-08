@@ -71,11 +71,15 @@ export default function App() {
   const drop = useCallback(() => {
     if (pb.phase === 'dropping' || pb.phase === 'replaying') return;
     lastActivity.current = performance.now() / 1000;
+    // unlock + haptic + knock must stay in this gesture turn for iOS
     audioEngine.unlock();
     haptic('drop');
     audioEngine.knock(0, 200, 0.3);
     window.clearTimeout(dropTimer.current);
-    dropTimer.current = window.setTimeout(() => pb.start(), 140);
+    dropTimer.current = window.setTimeout(() => {
+      audioEngine.unlock(); // re-prime if iOS suspended during the delay
+      pb.start();
+    }, 140);
   }, [pb]);
 
   // a route/take change retires the pending plunger timer — no ghost drops

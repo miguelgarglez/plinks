@@ -11,6 +11,9 @@ class FakeCtx {
   resume = vi.fn(async () => {
     this.state = 'running';
   });
+  suspend = vi.fn(async () => {
+    this.state = 'suspended';
+  });
   createGain() {
     return {
       gain: { value: 1, setTargetAtTime: vi.fn() },
@@ -31,6 +34,16 @@ class FakeCtx {
       getChannelData: () => new Float32Array(length),
     } as unknown as AudioBuffer;
   }
+  lastSource: { buffer: AudioBuffer | null; connect: ReturnType<typeof vi.fn>; start: ReturnType<typeof vi.fn> } | null = null;
+  createBufferSource = vi.fn(() => {
+    const src = {
+      buffer: null as AudioBuffer | null,
+      connect: vi.fn(),
+      start: vi.fn(),
+    };
+    this.lastSource = src;
+    return src;
+  });
 }
 
 describe('AudioEngine.unlock', () => {
@@ -67,5 +80,21 @@ describe('AudioEngine.unlock', () => {
     expect(last!.resume).toHaveBeenCalledTimes(2);
     await Promise.resolve();
     expect(eng.state).toBe('running');
+  });
+
+  it('starts a silent buffer during unlock to satisfy iOS', () => {
+    const eng = new AudioEngine();
+    eng.unlock();
+    expect(last!.createBufferSource).toHaveBeenCalled();
+    expect(last!.lastSource?.start).toHaveBeenCalledWith(0);
+  });
+
+  it('resumes an interrupted context', () => {
+    const eng = new AudioEngine();
+    eng.unlock();
+    (last as FakeCtx & { state: string }).state = 'interrupted';
+    last!.resume.mockClear();
+    eng.unlock();
+    expect(last!.resume).toHaveBeenCalledTimes(1);
   });
 });
