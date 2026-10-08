@@ -41,7 +41,8 @@ const STEPS: Step[] = [
     sel: '.plunger',
     text: 'Now press the plunger — gravity plays your word.',
     timeout: 16000,
-    prefer: ['aside', 'above', 'below'],
+    // below before above: on phones above the plunger is the rail and title
+    prefer: ['aside', 'below', 'above'],
   },
   {
     sel: '.score',
