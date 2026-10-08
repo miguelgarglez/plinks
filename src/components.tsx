@@ -79,18 +79,21 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
 
   // while scrubbing near an edge the paper keeps gliding on its own
   const scrubAtRef = useRef(scrubAt);
-  scrubAtRef.current = scrubAt;
+  useEffect(() => { scrubAtRef.current = scrubAt; });
   useEffect(() => {
     let raf = 0;
     const tick = () => {
       const rail = strip.current;
       const lc = lastClient.current;
-      if (rail && lc && scrubbing.current) {
+      // downDot held: a still press on a note must not scroll the paper
+      if (rail && lc && scrubbing.current && !downDot.current) {
         const rr = rail.getBoundingClientRect();
         const edge = 36;
         if (lc.x < rr.left + edge || lc.x > rr.right - edge) {
+          const before = rail.scrollLeft;
           rail.scrollLeft += lc.x < rr.left + edge ? -3.4 : 3.4;
-          if (!downDot.current) scrubAtRef.current(lc.x);
+          // at the scroll limit nothing moved — don't re-ring idle notes
+          if (rail.scrollLeft !== before) scrubAtRef.current(lc.x);
         }
       }
       raf = requestAnimationFrame(tick);
