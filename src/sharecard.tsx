@@ -32,6 +32,7 @@ export function ShareCard({ song, drop, take, onClose }: {
 
   // letter thunks, then the score plays itself onto the card
   useEffect(() => {
+    const prevFocus = document.activeElement as HTMLElement | null;
     audioEngine.unlock();
     audioEngine.setKit(song.kit);
     song.word.toUpperCase().split('').forEach((_, i) => {
@@ -45,15 +46,24 @@ export function ShareCard({ song, drop, take, onClose }: {
         if (audioEngine.ready && !audioEngine.muted) audioEngine.strike(e.midi, 0.28);
       }, startAt + i * step));
     });
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
     cardRef.current?.focus();
     return () => {
       timers.current.forEach(clearTimeout);
-      window.removeEventListener('keydown', onKey);
+      prevFocus?.focus?.(); // hand the ticket back to the finger that pulled it
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // real dialog behaviour: Tab loops inside the plate, Escape folds it away
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') { onClose(); return; }
+    if (e.key !== 'Tab' || !cardRef.current) return;
+    const els = cardRef.current.querySelectorAll<HTMLElement>('button, [href], [tabindex]:not([tabindex="-1"])');
+    if (!els.length) return;
+    const first = els[0], last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+    else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+  };
 
   const flash = (m: string) => {
     setMsg(m);
@@ -94,7 +104,7 @@ export function ShareCard({ song, drop, take, onClose }: {
       a.href = href;
       a.download = `the-song-of-${song.word}.png`;
       a.click();
-      setTimeout(() => URL.revokeObjectURL(href), 4000);
+      timers.current.push(window.setTimeout(() => URL.revokeObjectURL(href), 4000));
       flash('card saved');
     } catch {
       flash('save failed');
@@ -111,7 +121,12 @@ export function ShareCard({ song, drop, take, onClose }: {
         aria-label={`Share card for the song of ${song.word}`}
         tabIndex={-1}
         onClick={e => e.stopPropagation()}
+        onKeyDown={onKeyDown}
       >
+        <div className="share-perf" aria-hidden="true" />
+        <button type="button" className="screw-close" onClick={onClose} aria-label="Close share card">
+          <span className="screw-slot" aria-hidden="true" />
+        </button>
         <div className="share-head">
           <span>P L I N K S</span>
           <span>no. {song.serial}</span>
@@ -149,11 +164,27 @@ export function ShareCard({ song, drop, take, onClose }: {
         </div>
         <p className="share-url">{location.host}/{song.word}{take > 1 ? `?take=${take}` : ''}</p>
 
-        <div className="share-actions">
-          <button className="plate-btn" onClick={send}>send</button>
-          <button className="plate-btn" onClick={copy}>copy link</button>
-          <button className="plate-btn" onClick={save}>save card</button>
-          <button className="plate-btn plate-close" onClick={onClose}>close</button>
+        <div className="sc-controls">
+          <button type="button" className="sc-send" onClick={send} aria-label="Send this song">
+            <span className="sc-send-cap">send</span>
+            <span className="sc-send-collar" aria-hidden="true" />
+          </button>
+          <span className="sc-stud-wrap">
+            <button type="button" className="sc-stud" onClick={copy} aria-label="Copy the song link">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <path d="M6.5 9.5l3-3M5 11.5l-1.8 1.8a2.3 2.3 0 1 1-3.2-3.2L3.5 6.5a2.3 2.3 0 0 1 3.2 0M11 4.5l1.8-1.8a2.3 2.3 0 1 1 3.2 3.2L12.5 9.5a2.3 2.3 0 0 1-3.2 0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" transform="translate(-0.5,-0.5) scale(0.875)" />
+              </svg>
+            </button>
+            <span className="sc-stud-label">link</span>
+          </span>
+          <span className="sc-stud-wrap">
+            <button type="button" className="sc-stud" onClick={save} aria-label="Save the card as an image">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <path d="M8 2v8M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <span className="sc-stud-label">png</span>
+          </span>
         </div>
         {msg && <p className="share-status" role="status">{msg}</p>}
       </div>

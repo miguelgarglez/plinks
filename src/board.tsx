@@ -492,7 +492,10 @@ function draw(ctx: CanvasRenderingContext2D, W: number, song: Song, pb: Playback
   }
   ctx.globalAlpha = 1;
 
-  // note glyphs float up from strikes
+  // note glyphs float up from strikes; drain them once spent so strikes stay loud
+  for (let i = pb.glyphs.length - 1; i >= 0; i--) {
+    if (now - pb.glyphs[i].t0 > 1.4) pb.glyphs.splice(i, 1);
+  }
   ctx.font = `600 ${Math.max(9, 0.015 * S)}px "Space Mono", monospace`;
   ctx.textAlign = 'center';
   for (const gl of pb.glyphs) {

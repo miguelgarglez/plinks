@@ -68,12 +68,18 @@ export default function App() {
 
   // the plunger clacks, then gravity gets the marble — 140ms of anticipation
   const drop = useCallback(() => {
+    if (pb.phase === 'dropping' || pb.phase === 'replaying') return;
     lastActivity.current = performance.now() / 1000;
     audioEngine.unlock();
     audioEngine.knock(0, 200, 0.3);
     window.clearTimeout(dropTimer.current);
     dropTimer.current = window.setTimeout(() => pb.start(), 140);
   }, [pb]);
+
+  // a route/take change retires the pending plunger timer — no ghost drops
+  useEffect(() => {
+    window.clearTimeout(dropTimer.current);
+  }, [route.word, take]);
 
   const wantDrop = useRef(false);
   const navigate = useCallback((w: string, t = 1, autoplay = false) => {
@@ -194,10 +200,6 @@ export default function App() {
       <main className="hero">
         <h1 className="title">the song of <em key={song.word} className="word-em">{song.word}</em></h1>
         <p className="epithet">{song.epithet}</p>
-        <p className="meta">
-          {KITS[song.kit].name} · {SCALES[song.scale].name} · {song.bpm} bpm
-          {take > 1 && <> · take {take}</>}
-        </p>
       </main>
 
       <section className="instrument" aria-label="The bean machine">
@@ -217,6 +219,8 @@ export default function App() {
           onShare={openShare}
           muted={muted}
           onMute={toggleMute}
+          spec={`${KITS[song.kit].name} · ${SCALES[song.scale].name} · ${song.bpm} bpm${take > 1 ? ` · take ${take}` : ''}`}
+          fresh={pb.phase === 'idle' && !input.trim()}
         />
       </section>
 

@@ -39,8 +39,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 18px 4px 14px;
-  border-bottom: 1.5px solid var(--ink);
+  padding: 18px 4px 10px;
   font-size: 11px;
   letter-spacing: 0.26em;
   text-transform: uppercase;
@@ -95,7 +94,7 @@ body {
 }
 
 /* instrument */
-.instrument { margin-top: clamp(14px, 2.6vh, 26px); width: min(470px, 94vw, max(280px, 100vh - 540px)); }
+.instrument { margin-top: clamp(14px, 2.6vh, 26px); width: min(470px, 94vw, max(280px, 100vh - 560px)); }
 .rail {
   background: linear-gradient(180deg, #d4ac5e 0%, var(--brass) 45%, #96702a 100%);
   border-radius: 9px 9px 0 0;
@@ -151,7 +150,8 @@ body {
   scrollbar-width: none;
 }
 .score::-webkit-scrollbar { display: none; }
-.score-inner { position: relative; height: 100%; min-width: 100%; touch-action: pan-y; }
+.score-inner { position: relative; height: 100%; min-width: 100%; touch-action: pan-x pan-y; }
+.score-inner:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; border-radius: 4px; }
 .score.can-scroll::after {
   content: "";
   position: absolute; top: 0; right: 0; bottom: 0; width: 44px;
@@ -208,7 +208,7 @@ body {
   font-size: 11px; letter-spacing: 0.14em; color: var(--dim);
   text-align: center; padding: 0 12px;
 }
-.score-hint span { background: var(--bone); padding: 3px 10px; }
+.score-hint span { background: var(--bone); padding: 3px 10px; white-space: nowrap; }
 
 /* ── the control deck: walnut plate, brass fittings, real travel ── */
 .deck {
@@ -449,21 +449,48 @@ body {
   height: 2px; background: #3a2c17; transform: translateY(-50%);
 }
 
-/* engraved masthead key that replays the guide */
+/* etched maker's plate: the instrument's spec, engraved in the deck */
+.deck-spec {
+  flex: 1 1 100%;
+  margin-top: 2px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.1);
+  text-align: center;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: lowercase;
+  color: #7d6030;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5), 0 -1px 0 rgba(255, 220, 160, 0.14);
+}
+
+/* the empty slot breathes until a word feeds it */
+.deck.fresh .slot {
+  animation: slotCall 1.8s ease-in-out infinite;
+}
+@keyframes slotCall {
+  0%, 100% { box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,220,160,0.14); }
+  50% { box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 14px rgba(228,87,60,0.32), 0 1px 0 rgba(255,220,160,0.14); }
+}
+.ticket:disabled { opacity: 0.55; cursor: default; pointer-events: none; }
+.plunger:disabled .plunger-cap { cursor: default; }
+
+/* brass screw-head key that replays the guide */
 .q-key {
   margin-left: 10px;
-  width: 20px; height: 20px;
-  border-radius: 5px;
-  border: 1px solid var(--brass-dark);
-  background: linear-gradient(180deg, #e8dcc8, #d4c5a9);
-  color: var(--ink);
+  width: 21px; height: 21px;
+  border-radius: 50%;
+  border: 1px solid #6e5320;
+  background: radial-gradient(circle at 35% 28%, #ecc878, var(--brass) 60%, #7a5c22);
+  color: #2e2210;
   font-family: "Space Mono", monospace;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
   vertical-align: middle;
-  box-shadow: 0 1.5px 0 rgba(60,40,15,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
-  transition: transform 110ms var(--ease-out);
+  box-shadow: 0 1.5px 0 rgba(60,40,15,0.4), inset 0 1px 0 rgba(255,240,200,0.6);
+  transition: transform 110ms var(--ease-out), box-shadow 110ms var(--ease-out);
 }
 .q-key:active { transform: translateY(1.5px); box-shadow: 0 0 0 rgba(0,0,0,0); }
 .q-key:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
@@ -484,6 +511,7 @@ body {
 }
 @keyframes veilIn { from { opacity: 0; } }
 .share-plate {
+  position: relative;
   width: min(560px, 94vw);
   background:
     radial-gradient(rgba(120, 95, 55, 0.06) 1px, transparent 1px) 0 0 / 4px 4px,
@@ -493,11 +521,14 @@ body {
   padding: 26px 30px 24px;
   text-align: center;
   box-shadow: 0 30px 80px -20px rgba(20, 12, 4, 0.7), 0 3px 0 rgba(0,0,0,0.2);
-  animation: plateIn 480ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  animation: plateIn 640ms cubic-bezier(0.3, 1.35, 0.55, 1) both;
   outline: none;
 }
+/* the ticket is ejected from the deck below, landing with a wobble */
 @keyframes plateIn {
-  0% { opacity: 0; transform: translateY(26px) scale(0.94) rotate(-0.8deg); }
+  0% { opacity: 0; transform: translateY(52vh) rotate(1.6deg) scale(0.96); }
+  55% { opacity: 1; }
+  78% { transform: translateY(-6px) rotate(-0.4deg); }
   100% { opacity: 1; transform: none; }
 }
 .share-head {
@@ -559,12 +590,118 @@ body {
   letter-spacing: 0.06em;
   color: var(--ink);
 }
-.share-actions {
+/* punched ticket edge across the card top */
+.share-perf {
+  margin: -26px -30px 0;
+  height: 20px;
+  border-radius: 7px 7px 0 0;
+  background:
+    radial-gradient(circle 3.2px at center, rgba(30,21,11,0.65) 97%, transparent) 8px 50% / 26px 100% repeat-x;
+  border-bottom: 1px dashed rgba(120, 95, 55, 0.45);
+}
+/* slotted brass screw that folds the card away */
+.screw-close {
+  position: absolute;
+  top: -1px; right: 12px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1px solid #6e5320;
+  background: radial-gradient(circle at 35% 28%, #ecc878, var(--brass) 60%, #7a5c22);
+  box-shadow: 0 2px 0 rgba(50,32,10,0.45), inset 0 1px 0 rgba(255,240,200,0.6);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 140ms var(--ease-out);
+}
+.screw-close:hover { transform: rotate(38deg); }
+.screw-close:active { transform: rotate(38deg) scale(0.92); }
+.screw-close:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+.screw-slot {
+  position: absolute; left: 50%; top: 50%;
+  width: 12px; height: 2.4px;
+  border-radius: 2px;
+  background: #3a2c17;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 1px 0 rgba(255,235,190,0.35);
+}
+/* the control strip — machined parts, same family as the deck */
+.sc-controls {
   display: flex;
-  gap: 10px;
+  align-items: flex-end;
   justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 18px;
+  gap: 26px;
+  margin-top: 16px;
+}
+.sc-send {
+  position: relative;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+.sc-send-cap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 24px;
+  border-radius: 9px;
+  font-family: "Space Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #fff3e0;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.35);
+  background: radial-gradient(circle at 35% 22%, #f0705a, var(--ember) 55%, #a03418 100%);
+  border: 1px solid #8a2c14;
+  box-shadow:
+    0 4px 0 #7a2410,
+    0 6px 12px rgba(0,0,0,0.35),
+    inset 0 1px 1px rgba(255,200,170,0.6);
+  transition: transform 90ms var(--ease-out), box-shadow 90ms var(--ease-out), filter 160ms;
+}
+.sc-send-collar {
+  position: absolute;
+  left: 50%; bottom: -4px;
+  width: calc(100% + 10px); height: 9px;
+  transform: translateX(-50%);
+  border-radius: 0 0 7px 7px;
+  background: linear-gradient(180deg, #d9b060, #7a5c22);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+}
+.sc-send:hover .sc-send-cap { filter: brightness(1.07); }
+.sc-send:active .sc-send-cap {
+  transform: translateY(3.5px);
+  box-shadow: 0 1px 0 #7a2410, 0 2px 4px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,200,170,0.6);
+}
+.sc-send:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 9px; }
+.sc-stud-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.sc-stud {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid #6e5320;
+  padding: 0;
+  cursor: pointer;
+  color: #2e2210;
+  background: radial-gradient(circle at 35% 25%, #ecc878, var(--brass) 58%, #8a6624);
+  box-shadow: 0 3px 0 rgba(50,32,10,0.45), inset 0 2px 3px rgba(255,235,190,0.5), inset 0 -3px 5px rgba(0,0,0,0.3);
+  transition: transform 110ms var(--ease-out), box-shadow 110ms var(--ease-out), filter 140ms;
+}
+.sc-stud:hover { filter: brightness(1.08); }
+.sc-stud:active { transform: translateY(2.5px); box-shadow: 0 0.5px 0 rgba(50,32,10,0.45), inset 0 2px 3px rgba(255,235,190,0.4); }
+.sc-stud:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+.sc-stud-label {
+  font-size: 8.5px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--dim);
 }
 .share-status {
   margin-top: 12px;
@@ -694,23 +831,36 @@ body {
   border: 5px solid transparent;
   border-top-color: var(--brass);
 }
+/* domed brass replay key — part of the machine, not a web pill */
 .replay-key {
   pointer-events: auto;
   font-family: "Space Mono", monospace;
   font-size: 9.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink);
-  background: linear-gradient(180deg, #f1e8d6, #ddceb2);
-  border: 1px solid #8a6f45;
+  color: #2e2210;
+  text-shadow: 0 1px 0 rgba(255,235,190,0.5);
+  background: radial-gradient(circle at 35% 22%, #ecc878, var(--brass) 58%, #96702a);
+  border: 1px solid #6e5320;
   border-radius: 999px;
-  padding: 3px 10px;
+  padding: 5px 13px;
   cursor: pointer;
-  box-shadow: 0 1.5px 0 rgba(60,40,15,0.3);
-  transition: transform 100ms var(--ease-out);
+  box-shadow: 0 2.5px 0 rgba(50,32,10,0.5), inset 0 1px 0 rgba(255,240,200,0.7);
+  transition: transform 100ms var(--ease-out), box-shadow 100ms var(--ease-out), filter 140ms;
 }
-.replay-key:active { transform: translateY(1.5px); }
+.replay-key:hover { filter: brightness(1.07); }
+.replay-key:active { transform: translateY(2px); box-shadow: 0 0.5px 0 rgba(50,32,10,0.5); }
 .replay-key:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+
+/* the scrub hint teaches the gesture: a slow slide, left then right */
+.score-caption > span:first-child {
+  display: inline-block;
+  animation: captionTeach 2.8s ease-in-out infinite;
+}
+@keyframes captionTeach {
+  0%, 100% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+}
 
 .footer {
   margin-top: auto;
@@ -750,6 +900,8 @@ body {
   .score-playhead { transition: none; }
   .board-wrap { transition: none; }
   .dial-face { transition-duration: 1ms; }
+  .score-caption > span:first-child, .deck.fresh .slot { animation: none; }
+  .screw-close:hover { transform: none; }
 }
 
 .sr-only {
@@ -779,13 +931,16 @@ body {
   .score-caption { font-size: 12px; letter-spacing: 0.1em; }
   .score-hint { font-size: 12px; letter-spacing: 0.1em; }
   .deck {
-    gap: 12px;
+    justify-content: space-evenly;
+    gap: 14px;
     padding: 12px 12px 14px;
   }
-  .plunger { flex: 1 1 auto; }
-  .plunger-cap { min-height: 56px; }
+  .plunger { flex: 1 1 100%; } /* full-width ember bar — the thumb finds it blind */
+  .plunger-cap { min-height: 58px; }
   .deck-label { font-size: 10px; }
-  .share-plate { padding: 20px 18px 18px; }
+  .deck-spec { font-size: 8px; letter-spacing: 0.16em; }
+  .share-plate { padding: 26px 18px 18px; }
+  .share-perf { margin: -26px -18px 0; }
   .guide-tip p { font-size: 14px; }
 }
 @media (max-height: 700px) {

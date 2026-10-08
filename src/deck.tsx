@@ -18,6 +18,8 @@ export function Deck({
   onShare,
   muted,
   onMute,
+  spec,
+  fresh,
 }: {
   input: string;
   setInput: (v: string) => void;
@@ -29,6 +31,8 @@ export function Deck({
   onShare: () => void;
   muted: boolean;
   onMute: () => void;
+  spec: string;
+  fresh: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const dropping = phase === 'dropping' || phase === 'replaying';
@@ -36,7 +40,7 @@ export function Deck({
 
   return (
     <form
-      className="deck"
+      className={`deck${fresh ? ' fresh' : ''}`}
       onSubmit={onSubmit}
       aria-label="Instrument controls"
     >
@@ -62,6 +66,7 @@ export function Deck({
       <button
         type="submit"
         className={`plunger${dropping ? ' is-down' : ''}`}
+        disabled={dropping}
         aria-label={input.trim() && normalizeWord(input) !== word ? 'Compose and drop the marble' : 'Drop the marble'}
       >
         <span className="plunger-cap">
@@ -87,7 +92,7 @@ export function Deck({
         <span className="deck-label">take</span>
       </div>
 
-      <button type="button" className="ticket" onClick={onShare} aria-label="Share this song">
+      <button type="button" className="ticket" onClick={onShare} disabled={dropping} aria-label="Share this song">
         <span className="ticket-perf" aria-hidden="true" />
         <span className="ticket-text">share</span>
       </button>
@@ -104,6 +109,8 @@ export function Deck({
         </button>
         <span className="deck-label">sound</span>
       </span>
+
+      <div className="deck-spec">{spec}</div>
     </form>
   );
 }

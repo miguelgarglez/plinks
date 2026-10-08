@@ -57,6 +57,7 @@ export function simulate(song: Song, take: number): DropResult {
 
   const step = 60 / song.bpm / 4; // 16th grid
   let t = 0;
+  let ticks = 0; // integer ticks — t = ticks * DT never accumulates float error
   let settled = false;
   let gridCursor = -1;
   let stillFor = 0;
@@ -138,8 +139,9 @@ export function simulate(song: Song, take: number): DropResult {
       }
     }
 
-    if (Math.round(t / DT) % 4 === 0) samples.push({ t, x, y, vx, vy });
-    t += DT;
+    if (ticks % 4 === 0) samples.push({ t, x, y, vx, vy });
+    ticks++;
+    t = ticks * DT;
   }
 
   // drain failsafe (never reached in practice): let a still-airborne marble
@@ -157,8 +159,9 @@ export function simulate(song: Song, take: number): DropResult {
       vx *= 0.75;
       if (Math.abs(vy) < 0.06 && Math.abs(vx) < 0.07) { vy = 0; settled = true; }
     }
-    if (Math.round(t / DT) % 4 === 0) samples.push({ t, x, y, vx, vy });
-    t += DT;
+    if (ticks % 4 === 0) samples.push({ t, x, y, vx, vy });
+    ticks++;
+    t = ticks * DT;
   }
   samples.push({ t, x, y, vx, vy });
 
