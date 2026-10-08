@@ -44,6 +44,9 @@ body {
   text-transform: uppercase;
 }
 .masthead .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: Fraunces, serif;
   font-weight: 640;
   font-size: 17px;
@@ -51,6 +54,13 @@ body {
   text-transform: none;
   color: var(--ink);
   text-decoration: none;
+}
+.masthead .brand-mark {
+  display: block;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border-radius: 5px;
 }
 .mast-mid, .mast-right { color: var(--dim); }
 @media (max-width: 560px) { .mast-mid { display: none; } }
