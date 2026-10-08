@@ -169,7 +169,10 @@ export default function App() {
     return (
       <div className="page">
         <header className="masthead">
-          <a className="brand" href="/">Plinks</a>
+          <a className="brand" href="/">
+            <img className="brand-mark" src="/favicon.svg" width="22" height="22" alt="" />
+            Plinks
+          </a>
           <span className="mast-mid">generative bean machine</span>
           <span className="mast-right">est. 2026</span>
         </header>
@@ -188,7 +191,10 @@ export default function App() {
   return (
     <div className="page">
       <header className="masthead">
-        <a className="brand" href="/">Plinks</a>
+        <a className="brand" href="/">
+          <img className="brand-mark" src="/favicon.svg" width="22" height="22" alt="" />
+          Plinks
+        </a>
         <span className="mast-mid">generative bean machine</span>
         <span className="mast-right">
           no. {song.serial}
