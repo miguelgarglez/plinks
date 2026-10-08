@@ -109,7 +109,7 @@ export function usePlayback(song: Song, take: number): Playback {
       }
 
       // flashes land on the *audible* (quantized) note so sound and light agree
-      while (ei < drop.events.length && drop.events[ei].tGrid + LEAD <= ts) {
+      while (ei < drop.events.length && drop.events[ei].t + LEAD <= ts) {
         const e = drop.events[ei++];
         if (e.pegId >= 0) {
           s.flashes.set(e.pegId, now);
@@ -118,7 +118,7 @@ export function usePlayback(song: Song, take: number): Playback {
           if (navigator.vibrate) navigator.vibrate(3);
         }
       }
-      const lastGrid = drop.events.length ? drop.events[drop.events.length - 1].tGrid + LEAD : 1;
+      const lastGrid = drop.events.length ? drop.events[drop.events.length - 1].t + LEAD : 1;
       s.progress = Math.min(1, ts / Math.max(0.001, lastGrid));
       const land = drop.events[drop.events.length - 1];
       if (land && land.t <= ts && s.basinFlash === null) {
@@ -153,6 +153,7 @@ export function usePlayback(song: Song, take: number): Playback {
       const now = performance.now() / 1000;
       if (pegId >= 0) st.current.flashes.set(pegId, now);
       else st.current.basinFlash = now; // replaying the tonic lights the basin
+      force(v => v + 1); // publish the flash to the canvas's snapshot
       if (audioEngine.ready && !audioEngine.muted) audioEngine.strike(midi, vel);
     },
   };

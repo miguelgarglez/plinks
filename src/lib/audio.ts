@@ -134,8 +134,8 @@ export class AudioEngine {
 
   // schedule a whole melody; returns scheduled end time
   playEvents(events: NoteEventLike[], t0: number): number {
-    for (const e of events) this.strike(e.midi, e.vel, t0 + e.tGrid);
-    return t0 + (events.length ? events[events.length - 1].tGrid : 0) + 2.2;
+    for (const e of events) this.strike(e.midi, e.vel, t0 + e.t);
+    return t0 + (events.length ? events[events.length - 1].t : 0) + 2.2;
   }
 
   now(): number { return this.ctx ? this.ctx.currentTime : 0; }

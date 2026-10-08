@@ -8,7 +8,7 @@ export function OgCard() {
   const song = songFor('plinks')!;
   const drop = simulate(song, 1);
   const evs = drop.events;
-  const lastT = evs.length ? evs[evs.length - 1].tGrid : 1;
+  const lastT = evs.length ? evs[evs.length - 1].t : 1;
   const midis = evs.map(e => e.midi);
   const lo = Math.min(...midis), hi = Math.max(...midis);
 
@@ -42,7 +42,7 @@ export function OgCard() {
         <line x1="110" y1="90" x2="1090" y2="90" stroke="rgba(36,27,16,0.25)" />
         {evs.map((e, i) => {
           const u = hi > lo ? (e.midi - lo) / (hi - lo) : 0.5;
-          const x = 110 + (e.tGrid / Math.max(lastT, 0.001)) * 980;
+          const x = 110 + (e.t / Math.max(lastT, 0.001)) * 980;
           const y = 90 - (u - 0.5) * 96;
           return <circle key={i} cx={x} cy={y} r={e.pegId === -1 ? 9 : 6.5} fill={e.pegId === -1 ? '#E4573C' : ramp(u)} />;
         })}

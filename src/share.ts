@@ -54,7 +54,7 @@ export async function shareCardPng(song: Song, drop: DropResult, take: number): 
 
   // score rail
   const evs = drop.events;
-  const lastT = evs.length ? evs[evs.length - 1].tGrid : 1;
+  const lastT = evs.length ? evs[evs.length - 1].t : 1;
   const midis = evs.map(e => e.midi);
   const lo = Math.min(...midis), hi = Math.max(...midis);
   const sx0 = 110, sx1 = W - 110, sy = 440, sh = 120;
@@ -62,7 +62,7 @@ export async function shareCardPng(song: Song, drop: DropResult, take: number): 
   ctx.beginPath(); ctx.moveTo(sx0, sy); ctx.lineTo(sx1, sy); ctx.stroke();
   for (const e of evs) {
     const u = hi > lo ? (e.midi - lo) / (hi - lo) : 0.5;
-    const x = sx0 + (e.tGrid / Math.max(lastT, 0.001)) * (sx1 - sx0);
+    const x = sx0 + (e.t / Math.max(lastT, 0.001)) * (sx1 - sx0);
     const y = sy + (u - 0.5) * -sh * 0.8;
     ctx.fillStyle = e.pegId === -1 ? '#E4573C' : ramp(u);
     ctx.beginPath();
