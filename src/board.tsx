@@ -134,7 +134,8 @@ export function Board({ song, pb, onDrop, beadQueue }: {
       onDrop();
     };
 
-    // tilt the whole instrument toward the pointer — physical presence
+    // tilt the playfield toward the pointer — the canvas moves inside its
+    // walnut bezel so the rail, score and deck seams never shear
     const tiltRaf = { v: 0 };
     const applyTilt = () => {
       tiltRaf.v = 0;
@@ -142,12 +143,12 @@ export function Board({ song, pb, onDrop, beadQueue }: {
       const s = st.current;
       if (s.pb.reduced || s.pb.phase === 'dropping') {
         const push = s.pb.phase === 'dropping' && !s.pb.reduced ? 1.014 : 1;
-        wrap.style.transform = `perspective(950px) rotateX(0deg) rotateY(0deg) scale(${push})`;
+        cv.style.transform = `perspective(950px) rotateX(0deg) rotateY(0deg) scale(${push})`;
         return;
       }
       const rx = -f.tilt.y * 1.6;
       const ry = f.tilt.x * 2.0;
-      wrap.style.transform = `perspective(950px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1)`;
+      cv.style.transform = `perspective(950px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1)`;
     };
     const scheduleTilt = () => { if (!tiltRaf.v) tiltRaf.v = requestAnimationFrame(applyTilt); };
     const onWrapMove = (e: PointerEvent) => {
@@ -181,7 +182,7 @@ export function Board({ song, pb, onDrop, beadQueue }: {
     return () => {
       cancelAnimationFrame(raf);
       if (tiltRaf.v) cancelAnimationFrame(tiltRaf.v);
-      wrap.style.transform = '';
+      cv.style.transform = '';
       cv.removeEventListener('pointermove', onMove);
       cv.removeEventListener('pointerdown', onDown);
       cv.removeEventListener('pointerleave', onLeave);

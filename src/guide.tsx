@@ -24,8 +24,8 @@ type Step = {
   /** ms before the step gives up quietly — dismissal, not advancement */
   timeout: number;
   onlyPhase?: string;
-  /** place the tip above the target when what sits below are controls */
-  above?: boolean;
+  /** preferred slip positions, tried in order until one fits the viewport */
+  prefer: Array<'aside' | 'above' | 'below'>;
 };
 
 const STEPS: Step[] = [
@@ -34,19 +34,20 @@ const STEPS: Step[] = [
     text: 'Type any word — the machine eats the letters.',
     timeout: 16000,
     onlyPhase: 'idle',
-    above: true, // the slot's underside is the page edge; the board sits above
+    prefer: ['aside', 'above', 'below'],
   },
   {
     sel: '.plunger',
     text: 'Now press the plunger — gravity plays your word.',
     timeout: 16000,
-    above: true,
+    prefer: ['aside', 'above', 'below'],
   },
   {
     sel: '.score',
-    text: 'Drag across the rail — the melody is yours now.',
+    text: 'Drag the score strip — every note under your finger rings. The URL is the song.',
     timeout: 14000,
     onlyPhase: 'settled',
+    prefer: ['aside', 'below', 'above'],
   },
 ];
 
@@ -55,6 +56,8 @@ type Props = {
   typed: boolean;
   scrubbed: boolean;
   onDone: () => void;
+  /** hide without losing the current step — e.g. while the share card is open */
+  suspended?: boolean;
 };
 
 /**
@@ -63,7 +66,7 @@ type Props = {
  * bows out instead of marching on. Skippable, remembered in localStorage,
  * replayable from the "?" key in the masthead.
  */
-export function Guide({ phase, typed, scrubbed, onDone }: Props) {
+export function Guide({ phase, typed, scrubbed, onDone, suspended }: Props) {
   const [ix, setIx] = useState(0);
   const [booted, setBooted] = useState(false);
   const [view, setView] = useState<{ ix: number; x: number; y: number; w: number; h: number } | null>(null);
@@ -132,7 +135,7 @@ export function Guide({ phase, typed, scrubbed, onDone }: Props) {
     return () => cancelAnimationFrame(raf);
   }, [ix, phase]);
 
-  if (done.current) return null;
+  if (done.current || suspended) return null;
 
   // The bridging pill sits just under the word slot.
   if (!booted) {
@@ -151,13 +154,26 @@ export function Guide({ phase, typed, scrubbed, onDone }: Props) {
   const vh = window.innerHeight;
   const tipW = Math.min(250, vw - 32);
   const tipH = tipRef.current?.getBoundingClientRect().height || 104;
-  const tipX = rect ? clamp(rect.x + rect.w / 2 - tipW / 2, 12, vw - tipW - 12) : vw / 2 - tipW / 2;
-  const below = rect ? rect.y + rect.h + 14 : vh / 2;
-  const tipY = !rect
-    ? vh / 2
-    : step.above || below + tipH >= vh
-      ? Math.max(12, rect.y - 14 - tipH)
-      : below;
+  const gap = 14;
+  const inside = (x: number, y: number) =>
+    x >= 12 && x + tipW <= vw - 12 && y >= 12 && y + tipH <= vh - 12;
+  let tipX = vw / 2 - tipW / 2;
+  let tipY = vh / 2;
+  if (rect) {
+    const spots: Record<string, { x: number; y: number }> = {
+      // left of the target — lands on open placard space beside the deck,
+      // or in the placard column for the score, never over the controls
+      aside: { x: rect.x - gap - tipW, y: clamp(rect.y + rect.h / 2 - tipH / 2, 12, vh - tipH - 12) },
+      above: { x: clamp(rect.x + rect.w / 2 - tipW / 2, 12, vw - tipW - 12), y: rect.y - gap - tipH },
+      below: { x: clamp(rect.x + rect.w / 2 - tipW / 2, 12, vw - tipW - 12), y: rect.y + rect.h + gap },
+    };
+    const spot = step.prefer.map(p => spots[p]).find(s => inside(s.x, s.y));
+    if (spot) ({ x: tipX, y: tipY } = spot);
+    else {
+      tipX = clamp(spots.below.x, 12, vw - tipW - 12);
+      tipY = clamp(spots.below.y, 12, vh - tipH - 12);
+    }
+  }
 
   return (
     <div className={`guide${fading ? ' fading' : ''}`}>

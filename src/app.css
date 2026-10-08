@@ -32,14 +32,13 @@ body {
   padding: 0 20px 40px;
 }
 
-/* masthead — engraved program header */
+/* masthead — engraved program header, spanning the whole sheet */
 .masthead {
   width: 100%;
-  max-width: 1060px;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 18px 4px 10px;
+  padding: 16px 2px 10px;
   font-size: 11px;
   letter-spacing: 0.26em;
   text-transform: uppercase;
@@ -67,8 +66,9 @@ body {
   letter-spacing: -0.01em;
 }
 .title em {
-  font-style: italic;
-  font-weight: 600;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: -0.015em;
   color: var(--ink);
   display: inline-block;
   overflow-wrap: anywhere;
@@ -86,6 +86,7 @@ body {
   margin-top: 10px;
 }
 .meta {
+  display: none; /* placard furniture — the deck stays on stage on small screens */
   font-size: 11px;
   letter-spacing: 0.16em;
   color: var(--dim);
@@ -93,82 +94,126 @@ body {
   text-transform: lowercase;
 }
 
-/* stage + instrument */
+/* stage + instrument — one unified machine at every size */
 .stage { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .machine {
   margin-top: clamp(14px, 2.6vh, 26px);
   width: min(470px, 94vw, max(280px, 100vh - 560px));
   display: grid;
-  grid-template-areas: "rail" "board" "score" "deck";
+  grid-template-areas: "rail" "feed" "board" "score" "pair" "foot";
+  border: 1px solid var(--brass-dark);
+  border-radius: 14px;
+  overflow: hidden;
+  /* walnut casing: seams and tilt edge-reveals read as wood shadow */
+  background:
+    radial-gradient(rgba(255,214,150,0.05) 1px, transparent 1px) 0 0 / 5px 5px,
+    linear-gradient(180deg, #2c2115, #241a11);
+  box-shadow: 0 24px 60px -22px rgba(60, 40, 15, 0.5), 0 2px 0 rgba(0,0,0,0.06);
 }
 .rail { grid-area: rail; }
 .board-wrap { grid-area: board; }
 .score { grid-area: score; }
-.deck { grid-area: deck; }
-.deck-pair { display: flex; align-items: flex-end; justify-content: center; gap: 22px; }
+.machine .rail { border: none; border-bottom: 2px solid #6e5320; border-radius: 0; box-shadow: none; }
+.machine .board-wrap { border: none; border-radius: 0; box-shadow: none; background: #241a11; }
+.deck { display: contents; } /* the form dissolves into the machine's regions */
+.deck-feed {
+  grid-area: feed;
+  display: flex; align-items: flex-end; gap: 12px;
+  padding: 11px 14px 13px;
+  border-bottom: 1px solid rgba(0,0,0,0.5);
+  box-shadow: inset 0 -1px 0 rgba(255,220,160,0.07);
+}
+.deck-pair {
+  grid-area: pair;
+  display: flex; align-items: flex-end; justify-content: space-evenly;
+  gap: 10px; padding: 10px 14px 4px;
+}
+.deck-foot {
+  grid-area: foot;
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 4px 14px 14px;
+}
+/* case screws on the control panel's lower corners */
+.deck-foot::before, .deck-foot::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8c87e, #8a6624 70%);
+  box-shadow: inset 0 -1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,225,170,0.18);
+}
+.deck-foot::before { left: 7px; }
+.deck-foot::after { right: 7px; }
+.deck-slot-block { flex: 1 1 auto; min-width: 0; }
+.deck-feed .plunger { flex: 0 0 auto; min-width: 112px; }
 
-/* ── wide screens: the plates bolt into one console ── */
+/* ── wide screens: the deck bolts on beside the playfield ── */
 @media (min-width: 900px) {
+  .page { padding-bottom: 22px; }
+  .masthead { padding: 14px 2px 8px; }
+  .footer { padding-top: 16px; }
+  .stage {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(24px, 3.5vw, 64px);
+    flex: 1;
+    margin-top: clamp(6px, 1.5vh, 18px);
+  }
+  .hero { flex: 0 1 300px; min-width: 180px; margin-top: 0; text-align: left; }
+  .hero .meta {
+    display: inline-block;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(36,27,16,0.25);
+  }
   .machine {
+    flex: none; /* the casing never shrinks — the placard absorbs the slack */
     margin-top: 0;
     width: auto;
-    grid-template-columns: var(--board) var(--deckw, 218px);
+    --board: clamp(280px, min(100vh - 250px, 100vw - 520px), 620px);
+    --board: clamp(280px, min(100dvh - 250px, 100vw - 520px), 620px);
+    --deckw: clamp(196px, 15.5vw, 218px);
+    grid-template-columns: var(--board) var(--deckw);
     grid-template-rows: auto auto auto;
-    border: 1px solid var(--brass-dark);
-    border-radius: 14px;
-    overflow: hidden;
-    /* walnut backing: tilt edge-reveals and seams read as wood shadow */
-    background: linear-gradient(180deg, #2c2115, #241a11);
-    box-shadow: 0 24px 60px -22px rgba(60, 40, 15, 0.5), 0 2px 0 rgba(0,0,0,0.06);
+    grid-template-areas: "rail rail" "board deck" "score deck";
   }
-  .machine .rail { border: none; border-bottom: 2px solid #6e5320; border-radius: 0; box-shadow: none; }
-  .machine .board-wrap { border: none; border-radius: 0; box-shadow: none; }
-  .machine .score {
-    margin-top: 0;
-    border-top: 1px solid rgba(36,27,16,0.35);
-    background: rgba(239,231,218,0.92);
-  }
+  .machine .score { border-right: 1px solid var(--brass-dark); }
   .machine .deck {
-    margin-top: 0;
-    border: none;
-    border-left: 1px solid var(--brass-dark);
-    border-radius: 0;
+    display: flex;
+    margin: 0;
     flex-direction: column;
     flex-wrap: nowrap;
     align-items: stretch;
     justify-content: space-between;
     gap: 14px;
-    padding: 16px 16px 13px;
-    box-shadow: none;
+    padding: 16px 15px 14px;
+    position: relative;
+    border: none;
+    border-left: 1px solid var(--brass-dark);
+    border-radius: 0;
+    background:
+      radial-gradient(rgba(255,214,150,0.05) 1px, transparent 1px) 0 0 / 5px 5px,
+      linear-gradient(180deg, #4a3826 0%, #33261b 55%, #241a11 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.14);
   }
-  .machine .deck-slot-block, .machine .deck-spec { flex: none; }
-  .machine .plunger { width: 100%; }
-  .machine .ticket { align-self: stretch; }
+  .machine .deck-feed {
+    display: flex; flex-direction: column; align-items: stretch; gap: 12px;
+    padding: 0; border: none; box-shadow: none;
+  }
+  .machine .deck-pair { padding: 0; gap: 8px; justify-content: space-between; }
+  .machine .deck-foot { display: block; padding: 0; }
+  .machine .deck-foot::before, .machine .deck-foot::after { display: none; }
+  .machine .plunger { width: 100%; min-width: 0; }
+  .machine .ticket { width: 100%; }
   .machine .ticket-text { flex: 1; justify-content: center; }
-  .machine .mute-wrap { display: flex; }
-}
-
-/* placard beside the machine, like a museum label next to the object */
-@media (min-width: 900px) {
-  .stage {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(28px, 4.5vw, 72px);
-    flex: 1;
-    margin-top: clamp(10px, 2vh, 24px);
-  }
-  .hero { flex: 0 1 320px; margin-top: 0; text-align: left; }
-  .hero .meta {
-    margin-top: 18px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(36,27,16,0.25);
-    display: inline-block;
-  }
-  .machine {
-    --board: clamp(280px, min(100vh - 282px, 100vw - 620px), 620px);
-    --board: clamp(280px, min(100dvh - 282px, 100vw - 620px), 620px);
-    grid-template-areas: "rail rail" "board deck" "score deck";
+  .machine .deck-spec {
+    margin-top: 10px; padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,0.4);
+    box-shadow: inset 0 1px 0 rgba(255,220,160,0.1);
+    text-align: center;
   }
 }
 .rail {
@@ -213,17 +258,25 @@ body {
   cursor: pointer;
   outline-offset: -3px;
   touch-action: pan-y;
+  transition: transform 260ms var(--ease-out);
+  will-change: transform;
 }
 .board-canvas:focus-visible { outline: 2.5px solid var(--ember); }
 
-/* score */
+/* score — a punched paper tape printing out of the machine */
 .score {
   position: relative;
   height: 74px;
-  margin-top: 12px;
+  margin-top: 0;
   width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
+  border-top: 2px solid rgba(20,14,6,0.5);
+  border-bottom: 2px solid rgba(20,14,6,0.5);
+  box-shadow: inset 0 6px 9px -6px rgba(0,0,0,0.5);
+  background:
+    radial-gradient(circle 2px at center, rgba(52,38,18,0.45) 96%, transparent) 8px 5px / 24px 8px repeat-x,
+    linear-gradient(180deg, #efe9db, #e2d8c2);
 }
 .score::-webkit-scrollbar { display: none; }
 .score-inner { position: relative; height: 100%; min-width: 100%; touch-action: pan-x pan-y; }
@@ -231,7 +284,7 @@ body {
 .score.can-scroll::after {
   content: "";
   position: absolute; top: 0; right: 0; bottom: 0; width: 44px;
-  background: linear-gradient(90deg, rgba(239,231,218,0), var(--bone));
+  background: linear-gradient(90deg, rgba(226,216,194,0), #e2d8c2);
   pointer-events: none;
 }
 .score.can-scroll .score-caption { color: var(--ink-soft); }
@@ -281,22 +334,15 @@ body {
 .score-hint {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; letter-spacing: 0.14em; color: var(--dim);
+  font-size: 12px; letter-spacing: 0.14em; color: var(--dim);
   text-align: center; padding: 0 12px;
 }
-.score-hint span { background: var(--bone); padding: 3px 10px; white-space: nowrap; }
+.score-hint span { background: #ece3d2; padding: 3px 10px; white-space: nowrap; }
 
-/* ── the control deck: walnut plate, brass fittings, real travel ── */
+/* ── the control deck: walnut plate, brass fittings, real travel ──
+   (the form is display:contents below 900px; it only gains a box as the
+   desktop side panel, where .machine .deck supplies the layout) */
 .deck {
-  margin-top: 14px;
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  flex-wrap: wrap;
-  column-gap: 16px;
-  row-gap: 12px;
-  padding: 13px 14px 15px;
   border-radius: 12px;
   border: 1px solid var(--brass-dark);
   background:
@@ -306,7 +352,6 @@ body {
     0 14px 34px -14px rgba(50, 32, 12, 0.55),
     inset 0 1px 0 rgba(255, 220, 160, 0.16),
     inset 0 -2px 4px rgba(0, 0, 0, 0.35);
-  position: relative;
 }
 /* corner screws */
 .deck::before, .deck::after {
@@ -323,16 +368,21 @@ body {
 
 .deck-label {
   display: block;
-  font-size: 9px;
-  letter-spacing: 0.3em;
+  font-size: 10px;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: #8f6f38;
+  color: #a8843f;
   text-shadow: 0 1px 0 rgba(255, 220, 160, 0.18);
   text-align: center;
   margin-bottom: 5px;
 }
 
-.deck-slot-block { flex: 1 1 100%; }
+.deck-foot .deck-spec {
+  margin: 0; padding: 0;
+  border: none; box-shadow: none;
+  flex: 1 1 auto;
+  text-align: right;
+}
 .slot {
   width: 100%;
   font-family: "Space Mono", monospace;
@@ -413,8 +463,15 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
-.deck-cluster .deck-label { margin-bottom: 0; margin-top: 4px; }
+/* knob captions are subordinate — tighter tracking so they fit the panel */
+.deck-cluster .deck-label, .mute-wrap .deck-label {
+  margin-bottom: 0; margin-top: 4px;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
 .dial {
   position: relative;
   width: 46px; height: 46px;
@@ -450,12 +507,40 @@ body {
 .dial-num {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #2e2210;
   text-shadow: 0 1px 0 rgba(255,230,180,0.4);
 }
+
+/* pilot lamp — glows while the marble is in play */
+.pilot {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 28%, #d9b060, #8a6624 75%);
+  border: 1px solid #5e441a;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,235,190,0.4);
+  margin-bottom: 11px; /* bezel centres on the knob line */
+}
+.pilot-lamp {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #57452c, #241a11 80%);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.65);
+  transition: background 200ms, box-shadow 200ms;
+}
+.pilot.lit .pilot-lamp {
+  background: radial-gradient(circle at 40% 32%, #ffd9a8, var(--ember) 55%, #7c2210);
+  box-shadow: 0 0 9px rgba(228,87,60,0.8), inset 0 0 3px rgba(255,230,190,0.9);
+  animation: pilotGlow 700ms ease-in-out infinite;
+}
+@keyframes pilotGlow {
+  0%, 100% { box-shadow: 0 0 7px rgba(228,87,60,0.65), inset 0 0 3px rgba(255,230,190,0.9); }
+  50% { box-shadow: 0 0 13px rgba(228,87,60,0.95), inset 0 0 3px rgba(255,230,190,0.9); }
+}
+.pilot-cluster .deck-label { margin-top: 0; }
 
 /* share ticket — perforated stub that shears on press */
 .ticket {
@@ -482,7 +567,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0 16px;
-  min-height: 42px;
+  min-height: 46px;
   font-family: "Space Mono", monospace;
   font-size: 11.5px;
   letter-spacing: 0.2em;
@@ -500,7 +585,7 @@ body {
 
 /* rotating brass mute knob */
 .mute {
-  width: 42px; height: 42px;
+  width: 46px; height: 46px;
   border-radius: 50%;
   border: 1.5px solid var(--brass-dark);
   background: radial-gradient(circle at 35% 30%, #e0bc6e, var(--brass) 55%, #8a6624);
@@ -524,6 +609,20 @@ body {
   content: ""; position: absolute; left: 8px; right: 8px; top: 50%;
   height: 2px; background: #3a2c17; transform: translateY(-50%);
 }
+/* jewel indicator on the wrap's shoulder — lit means sound on */
+.mute-lamp {
+  position: absolute;
+  top: -3px; right: 2px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #4a3a22, #241a11);
+  border: 1px solid #14100a;
+  transition: background 180ms, box-shadow 180ms;
+}
+.mute-lamp.on {
+  background: radial-gradient(circle at 40% 30%, #ffe9b8, #e8a23c 60%, #8a4a10);
+  box-shadow: 0 0 7px rgba(232,162,60,0.85);
+}
 
 /* etched maker's plate: the instrument's spec, engraved in the deck */
 .deck-spec {
@@ -533,10 +632,10 @@ body {
   border-top: 1px solid rgba(0, 0, 0, 0.4);
   box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.1);
   text-align: center;
-  font-size: 9px;
-  letter-spacing: 0.24em;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
   text-transform: lowercase;
-  color: #7d6030;
+  color: #96743a;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5), 0 -1px 0 rgba(255, 220, 160, 0.14);
 }
 
@@ -691,14 +790,23 @@ body {
 .screw-close:hover { transform: rotate(38deg); }
 .screw-close:active { transform: rotate(38deg) scale(0.92); }
 .screw-close:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
-.screw-slot {
+/* a crossed slot reads unmistakably as "close" and stays a screw head */
+.screw-cross {
   position: absolute; left: 50%; top: 50%;
+  width: 12px; height: 12px;
+  transform: translate(-50%, -50%);
+}
+.screw-cross::before, .screw-cross::after {
+  content: "";
+  position: absolute; left: 0; top: 50%;
   width: 12px; height: 2.4px;
+  margin-top: -1.2px;
   border-radius: 2px;
   background: #3a2c17;
-  transform: translate(-50%, -50%);
   box-shadow: 0 1px 0 rgba(255,235,190,0.35);
 }
+.screw-cross::before { transform: rotate(45deg); }
+.screw-cross::after { transform: rotate(-45deg); }
 /* the control strip — machined parts, same family as the deck */
 .sc-controls {
   display: flex;
@@ -836,31 +944,39 @@ body {
 }
 .guide-corner {
   fill: none;
-  stroke: var(--ember);
+  stroke: #a8852e; /* brass jeweler's marks — ember belongs to the plunger */
   stroke-width: 2.5;
   stroke-linecap: round;
   filter: drop-shadow(0 1px 2px rgba(60,30,10,0.4));
 }
 .guide-tip {
   position: fixed;
-  background: var(--bone);
-  border: 1.5px solid var(--ink);
-  border-radius: 9px;
-  padding: 12px 14px;
+  background: linear-gradient(180deg, #f0e9db, #e6dcc7);
+  border: 1px solid var(--brass-dark);
+  border-radius: 8px;
+  padding: 12px 14px 12px;
   box-shadow: 0 10px 30px rgba(30,18,6,0.4), 0 2px 0 rgba(0,0,0,0.08);
   animation: tipIn 320ms var(--ease-out) both;
   pointer-events: auto;
   z-index: 51;
+}
+/* the slips are punched tape, same family as the score and the ticket */
+.guide-tip::before {
+  content: "";
+  display: block;
+  height: 8px;
+  margin: -5px -6px 9px;
+  background: radial-gradient(circle 2px at center, rgba(60,44,22,0.5) 96%, transparent) 0 50% / 18px 100% repeat-x;
+  border-bottom: 1px dashed rgba(120,95,55,0.45);
 }
 @keyframes tipIn {
   from { opacity: 0; transform: translateY(8px) scale(0.96); }
   to { opacity: 1; transform: none; }
 }
 .guide-tip p {
-  font-family: Fraunces, serif;
-  font-size: 15.5px;
-  font-weight: 540;
-  line-height: 1.35;
+  font-family: "Space Mono", monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
   margin: 4px 0 8px;
 }
 .guide-step {
@@ -899,6 +1015,18 @@ body {
   transform: translateX(-50%);
   pointer-events: none;
 }
+/* a brass grip you can grab — the scrub handle, not just a line */
+.score-scrubhead::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 28%, #ecc878, var(--brass) 60%, #7a5c22);
+  border: 1px solid #6e5320;
+  box-shadow: 0 1px 3px rgba(40,26,8,0.55), inset 0 1px 0 rgba(255,240,200,0.6);
+}
 .score-scrubhead::after {
   content: "";
   position: absolute;
@@ -919,7 +1047,8 @@ body {
   background: radial-gradient(circle at 35% 22%, #ecc878, var(--brass) 58%, #96702a);
   border: 1px solid #6e5320;
   border-radius: 999px;
-  padding: 5px 13px;
+  padding: 9px 16px;
+  font-size: 10.5px;
   cursor: pointer;
   box-shadow: 0 2.5px 0 rgba(50,32,10,0.5), inset 0 1px 0 rgba(255,240,200,0.7);
   transition: transform 100ms var(--ease-out), box-shadow 100ms var(--ease-out), filter 140ms;
@@ -942,7 +1071,6 @@ body {
   margin-top: auto;
   padding-top: 30px;
   width: 100%;
-  max-width: 1060px;
   display: flex;
   justify-content: space-between;
   font-size: 11px;
@@ -974,7 +1102,7 @@ body {
   .rail-letter, .word-em, .share-status, .share-letter, .share-plate, .guide-mini, .guide-tip, .veil { animation-duration: 1ms; }
   .score-dot, .score-dot.on { transition-duration: 1ms; animation: none; }
   .score-playhead { transition: none; }
-  .board-wrap { transition: none; }
+  .board-canvas { transition: none; }
   .dial-face { transition-duration: 1ms; }
   .score-caption > span:first-child, .deck.fresh .slot { animation: none; }
   .screw-close:hover { transform: none; }
@@ -988,6 +1116,7 @@ body {
 }
 
 .mute-wrap {
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -996,33 +1125,27 @@ body {
 .score-caption {
   position: absolute; left: 0; right: 0; bottom: 0;
   display: flex; align-items: flex-end; justify-content: space-between;
-  font-size: 10px; letter-spacing: 0.14em; color: var(--dim);
+  font-size: 11px; letter-spacing: 0.12em; color: var(--dim);
   pointer-events: none;
   padding: 0 2px 2px;
 }
 
+@media (max-width: 380px) {
+  .deck-foot { justify-content: center; }
+  .deck-foot .deck-spec { display: none; }
+}
 @media (max-width: 560px) {
-  .meta { font-size: 12px; }
-  .mute-tag { font-size: 12px; letter-spacing: 0.14em; }
-  .score-caption { font-size: 12px; letter-spacing: 0.1em; }
+  .score-caption { font-size: 12px; letter-spacing: 0.08em; }
   .score-hint { font-size: 12px; letter-spacing: 0.1em; }
-  .deck {
-    justify-content: space-evenly;
-    gap: 14px;
-    padding: 12px 12px 14px;
-  }
-  .plunger { flex: 1 1 100%; } /* full-width ember bar — the thumb finds it blind */
   .plunger-cap { min-height: 58px; }
-  .deck-label { font-size: 10px; }
-  .deck-spec { font-size: 8px; letter-spacing: 0.16em; }
+  .deck-foot .deck-spec { font-size: 8.5px; letter-spacing: 0.14em; }
   .share-plate { padding: 26px 18px 18px; }
   .share-perf { margin: -26px -18px 0; }
-  .guide-tip p { font-size: 14px; }
+  .guide-tip p { font-size: 12px; }
 }
 @media (max-height: 700px) {
   .hero { margin-top: 14px; }
   .epithet { margin-top: 6px; }
-  .meta { margin-top: 8px; }
-  .score { height: 62px; margin-top: 8px; }
+  .score { height: 62px; }
   .footer { padding-top: 18px; }
 }

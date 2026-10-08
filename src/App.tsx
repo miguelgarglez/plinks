@@ -201,7 +201,7 @@ export default function App() {
         <div className="hero">
           <h1 className="title">the song of <em key={song.word} className="word-em">{song.word}</em></h1>
           <p className="epithet">{song.epithet}</p>
-          <p className="meta">deterministic physics · same word, same song, forever</p>
+          <p className="meta">no. {song.serial} · deterministic physics · same word, same song</p>
         </div>
 
         <section className="machine" aria-label="The bean machine">
@@ -240,6 +240,7 @@ export default function App() {
 
       {guideOn && (
         <Guide
+          suspended={showCard}
           phase={pb.phase}
           typed={typed || input.trim().length > 0}
           scrubbed={scrubbed}
