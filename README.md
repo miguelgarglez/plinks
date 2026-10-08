@@ -70,8 +70,26 @@ npm run lint       # oxlint
 ## Stack
 
 Vite · React 19 · TypeScript · Canvas 2D · Web Audio API (Karplus-Strong +
-convolution reverb) · zero runtime dependencies, fonts self-hosted via
-@fontsource. Deployed on Vercel.
+convolution reverb) · [`web-haptics`](https://haptics.lochie.me) for optional
+tactile feedback · fonts self-hosted via @fontsource. Deployed on Vercel.
+
+## Haptics
+
+Plinks calls [`web-haptics`](https://haptics.lochie.me) on DROP, peg notes,
+scrub, replay, and share. The library is kept on purpose; feedback is best-effort.
+
+It only feels like something on devices that expose a real vibration path to the
+page. In practice that is mostly **Android Chrome** (`navigator.vibrate`).
+
+It will not fire on:
+
+- **iPhone Safari or Chrome** — both use WebKit; there is no Vibration API, and
+  the library's checkbox/`switch` fallback is unreliable across iOS versions
+- **Mac Safari or Chrome** — no Taptic path for the web in normal browser use
+
+Quick check: open [haptics.lochie.me](https://haptics.lochie.me) on the same
+device and browser. If that demo is silent, Plinks will be too. That is a
+platform limit, not a wiring bug in this repo.
 
 ## License
 
