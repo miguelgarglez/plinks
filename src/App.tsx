@@ -3,7 +3,7 @@ import { songFor, normalizeWord } from './lib/song';
 import { usePlayback, audioEngine } from './playback';
 import { Board } from './board';
 import { Rail, ScoreRail } from './components';
-import { Deck } from './deck';
+import { Feed, DeckAux } from './deck';
 import { ShareCard } from './sharecard';
 import { Guide, guideSeen, markGuideSeen } from './guide';
 import { KITS, SCALES } from './lib/music';
@@ -206,23 +206,26 @@ export default function App() {
 
         <section className="machine" aria-label="The bean machine">
           <Rail word={song.word} />
-          <div className="board-wrap">
-            <Board song={song} pb={pb} onDrop={drop} beadQueue={beadQueue} />
-          </div>
-          <ScoreRail song={song} drop={pb.drop} pb={pb} onScrub={() => setScrubbed(true)} />
-          <Deck
+          <Feed
             input={input}
             setInput={onType}
             onSubmit={onSubmit}
             phase={pb.phase}
             word={song.word}
+            fresh={pb.phase === 'idle' && !input.trim()}
+          />
+          <div className="board-wrap">
+            <Board song={song} pb={pb} onDrop={drop} beadQueue={beadQueue} />
+          </div>
+          <ScoreRail song={song} drop={pb.drop} pb={pb} onScrub={() => setScrubbed(true)} />
+          <DeckAux
+            phase={pb.phase}
             take={take}
             onTake={anotherTake}
             onShare={openShare}
             muted={muted}
             onMute={toggleMute}
             spec={`${KITS[song.kit].name} · ${SCALES[song.scale].name} · ${song.bpm} bpm${take > 1 ? ` · take ${take}` : ''}`}
-            fresh={pb.phase === 'idle' && !input.trim()}
           />
         </section>
       </main>

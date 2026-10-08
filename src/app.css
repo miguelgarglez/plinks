@@ -115,7 +115,7 @@ body {
 .score { grid-area: score; }
 .machine .rail { border: none; border-bottom: 2px solid #6e5320; border-radius: 0; box-shadow: none; }
 .machine .board-wrap { border: none; border-radius: 0; box-shadow: none; background: #241a11; }
-.deck { display: contents; } /* the form dissolves into the machine's regions */
+.deck-aux { display: contents; } /* dissolves into the machine's regions on small screens */
 .deck-feed {
   grid-area: feed;
   display: flex; align-items: flex-end; gap: 12px;
@@ -177,32 +177,43 @@ body {
     --board: clamp(280px, min(100dvh - 250px, 100vw - 520px), 620px);
     --deckw: clamp(196px, 15.5vw, 218px);
     grid-template-columns: var(--board) var(--deckw);
-    grid-template-rows: auto auto auto;
-    grid-template-areas: "rail rail" "board deck" "score deck";
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas: "rail rail" "board feed" "board aux" "score aux";
   }
-  .machine .score { border-right: 1px solid var(--brass-dark); }
-  .machine .deck {
-    display: flex;
-    margin: 0;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 16px 15px 14px;
-    position: relative;
-    border: none;
+  /* two bolted-on plates: the feed hopper up top, the controls panel below */
+  .machine .deck-feed, .machine .deck-aux {
     border-left: 1px solid var(--brass-dark);
-    border-radius: 0;
     background:
       radial-gradient(rgba(255,214,150,0.05) 1px, transparent 1px) 0 0 / 5px 5px,
       linear-gradient(180deg, #4a3826 0%, #33261b 55%, #241a11 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.14);
   }
   .machine .deck-feed {
     display: flex; flex-direction: column; align-items: stretch; gap: 12px;
-    padding: 0; border: none; box-shadow: none;
+    padding: 15px 15px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.55);
+    box-shadow: inset 0 -1px 0 rgba(255,220,160,0.08);
   }
+  .machine .deck-aux {
+    grid-area: aux;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 15px 15px;
+    position: relative;
+  }
+  .machine .deck-aux::before, .machine .deck-aux::after {
+    content: "";
+    position: absolute;
+    top: 7px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e8c87e, #8a6624 70%);
+    box-shadow: inset 0 -1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,225,170,0.18);
+  }
+  .machine .deck-aux::before { left: 7px; }
+  .machine .deck-aux::after { right: 7px; }
   .machine .deck-pair { padding: 0; gap: 8px; justify-content: space-between; }
   .machine .deck-foot { display: block; padding: 0; }
   .machine .deck-foot::before, .machine .deck-foot::after { display: none; }
@@ -339,32 +350,9 @@ body {
 }
 .score-hint span { background: #ece3d2; padding: 3px 10px; white-space: nowrap; }
 
-/* ── the control deck: walnut plate, brass fittings, real travel ──
-   (the form is display:contents below 900px; it only gains a box as the
-   desktop side panel, where .machine .deck supplies the layout) */
-.deck {
-  border-radius: 12px;
-  border: 1px solid var(--brass-dark);
-  background:
-    radial-gradient(rgba(255,214,150,0.05) 1px, transparent 1px) 0 0 / 5px 5px,
-    linear-gradient(180deg, #4a3826 0%, #33261b 55%, #241a11 100%);
-  box-shadow:
-    0 14px 34px -14px rgba(50, 32, 12, 0.55),
-    inset 0 1px 0 rgba(255, 220, 160, 0.16),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.35);
-}
-/* corner screws */
-.deck::before, .deck::after {
-  content: "";
-  position: absolute;
-  top: 7px;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #e8c87e, #8a6624 70%);
-  box-shadow: inset 0 -1px 1px rgba(0,0,0,0.5), 0 1px 0 rgba(255,225,170,0.18);
-}
-.deck::before { left: 8px; }
-.deck::after { right: 8px; }
+/* ── the control deck: walnut plates, brass fittings, real travel ──
+   (below 900px .deck-aux is display:contents so pair/foot join the
+   machine grid directly; the plates only gain a box on desktop) */
 
 .deck-label {
   display: block;
@@ -640,7 +628,7 @@ body {
 }
 
 /* the empty slot breathes until a word feeds it */
-.deck.fresh .slot {
+.deck-feed.fresh .slot {
   animation: slotCall 1.8s ease-in-out infinite;
 }
 @keyframes slotCall {
@@ -1002,7 +990,17 @@ body {
 .guide-skip-floating {
   position: fixed;
   bottom: 18px; right: 18px;
+  padding: 8px 14px;
+  border: 1px solid rgba(107, 92, 74, 0.45);
+  border-radius: 999px;
+  background: var(--bone);
+  text-decoration: none;
+  box-shadow: 0 4px 14px -6px rgba(50, 32, 12, 0.4);
   pointer-events: auto;
+}
+@media (min-width: 900px) {
+  /* clear of the fixed footer line */
+  .guide-skip-floating { bottom: 58px; right: 22px; }
 }
 
 /* score scrub head + replay key */
@@ -1104,7 +1102,7 @@ body {
   .score-playhead { transition: none; }
   .board-canvas { transition: none; }
   .dial-face { transition-duration: 1ms; }
-  .score-caption > span:first-child, .deck.fresh .slot { animation: none; }
+  .score-caption > span:first-child, .deck-feed.fresh .slot { animation: none; }
   .screw-close:hover { transform: none; }
 }
 

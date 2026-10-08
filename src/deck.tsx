@@ -2,24 +2,20 @@ import { useRef, useState } from 'react';
 import { normalizeWord } from './lib/song';
 
 /**
- * The machined control deck: a walnut plate faced in brass, holding a word
- * slot, an ember drop plunger, a knurled take dial, a pilot lamp that glows
- * while the marble is in play, a perforated share ticket and the sound knob.
- * Everything has travel — press states sink, the dial spins on a detent,
- * the ticket shears. No outlined rectangles.
+ * The machined control surfaces, split where the machine splits them:
+ * Feed is the word slot plus the ember drop plunger — on small screens it
+ * bolts in above the playfield so a drop never needs a scroll. DeckAux is
+ * the secondary panel — knurled variation dial, a pilot lamp that glows
+ * while the marble is in play, the sound knob, the perforated share ticket
+ * and the engraved spec. Everything has travel — press states sink, the
+ * dial spins on a detent, the ticket shears. No outlined rectangles.
  */
-export function Deck({
+export function Feed({
   input,
   setInput,
   onSubmit,
   phase,
   word,
-  take,
-  onTake,
-  onShare,
-  muted,
-  onMute,
-  spec,
   fresh,
 }: {
   input: string;
@@ -27,12 +23,6 @@ export function Deck({
   onSubmit: (e: React.FormEvent) => void;
   phase: string;
   word: string;
-  take: number;
-  onTake: () => void;
-  onShare: () => void;
-  muted: boolean;
-  onMute: () => void;
-  spec: string;
   fresh: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,44 +39,65 @@ export function Deck({
 
   return (
     <form
-      className={`deck${fresh ? ' fresh' : ''}`}
+      className={`deck-feed${fresh ? ' fresh' : ''}`}
       onSubmit={onSubmit}
-      aria-label="Instrument controls"
+      aria-label="Feed the machine a word"
     >
-      <div className="deck-feed">
-        <div className="deck-slot-block">
-          <label className="deck-label" htmlFor="word-slot">word</label>
-          <input
-            ref={inputRef}
-            id="word-slot"
-            className="slot"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !finePointer) inputRef.current?.blur(); }}
-            placeholder="type a word"
-            aria-label="A word to compose a song from"
-            autoFocus={finePointer}
-            maxLength={32}
-            spellCheck={false}
-            autoComplete="off"
-            enterKeyHint="go"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className={`plunger${engaged ? ' is-down' : ''}`}
-          onClick={engage}
-          disabled={dropping}
-          aria-label={input.trim() && normalizeWord(input) !== word ? 'Compose and drop the marble' : 'Drop the marble'}
-        >
-          <span className="plunger-cap">
-            {dropping ? 'playing' : input.trim() && normalizeWord(input) !== word ? 'compose' : 'drop'}
-          </span>
-          <span className="plunger-collar" aria-hidden="true" />
-        </button>
+      <div className="deck-slot-block">
+        <label className="deck-label" htmlFor="word-slot">word</label>
+        <input
+          ref={inputRef}
+          id="word-slot"
+          className="slot"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !finePointer) inputRef.current?.blur(); }}
+          placeholder="type a word"
+          aria-label="A word to compose a song from"
+          autoFocus={finePointer}
+          maxLength={32}
+          spellCheck={false}
+          autoComplete="off"
+          enterKeyHint="go"
+        />
       </div>
 
+      <button
+        type="submit"
+        className={`plunger${engaged ? ' is-down' : ''}`}
+        onClick={engage}
+        disabled={dropping}
+        aria-label={input.trim() && normalizeWord(input) !== word ? 'Compose and drop the marble' : 'Drop the marble'}
+      >
+        <span className="plunger-cap">
+          {dropping ? 'playing' : input.trim() && normalizeWord(input) !== word ? 'compose' : 'drop'}
+        </span>
+        <span className="plunger-collar" aria-hidden="true" />
+      </button>
+    </form>
+  );
+}
+
+export function DeckAux({
+  phase,
+  take,
+  onTake,
+  onShare,
+  muted,
+  onMute,
+  spec,
+}: {
+  phase: string;
+  take: number;
+  onTake: () => void;
+  onShare: () => void;
+  muted: boolean;
+  onMute: () => void;
+  spec: string;
+}) {
+  const dropping = phase === 'dropping' || phase === 'replaying';
+  return (
+    <div className="deck-aux">
       <div className="deck-pair">
         <div className="deck-cluster">
           <button
@@ -134,6 +145,6 @@ export function Deck({
         </button>
         <div className="deck-spec">{spec}</div>
       </div>
-    </form>
+    </div>
   );
 }

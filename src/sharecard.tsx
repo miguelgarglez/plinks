@@ -61,8 +61,11 @@ export function ShareCard({ song, drop, take, onClose }: {
     const els = cardRef.current.querySelectorAll<HTMLElement>('button, [href], [tabindex]:not([tabindex="-1"])');
     if (!els.length) return;
     const first = els[0], last = els[els.length - 1];
-    if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
-    else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+    const active = document.activeElement;
+    // the plate itself holds initial focus — treat it as past-the-end so
+    // Shift+Tab wraps to the last control and Tab wraps to the first
+    if (e.shiftKey && (active === first || active === cardRef.current)) { last.focus(); e.preventDefault(); }
+    else if (!e.shiftKey && (active === last || active === cardRef.current)) { first.focus(); e.preventDefault(); }
   };
 
   const flash = (m: string) => {
