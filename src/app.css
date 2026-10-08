@@ -98,7 +98,7 @@ body {
 .stage { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .machine {
   margin-top: clamp(14px, 2.6vh, 26px);
-  width: min(470px, 94vw, max(280px, 100vh - 560px));
+  width: min(470px, 94vw);
   display: grid;
   grid-template-areas: "rail" "feed" "board" "score" "pair" "foot";
   border: 1px solid var(--brass-dark);
@@ -290,7 +290,9 @@ body {
     linear-gradient(180deg, #efe9db, #e2d8c2);
 }
 .score::-webkit-scrollbar { display: none; }
-.score-inner { position: relative; height: 100%; min-width: 100%; touch-action: pan-x pan-y; }
+/* vertical swipes scroll the page; horizontal drags scrub — the paper
+   glides under the pointer via edge auto-scroll, no native pan needed */
+.score-inner { position: relative; height: 100%; min-width: 100%; touch-action: pan-y; }
 .score-inner:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; border-radius: 4px; }
 .score.can-scroll::after {
   content: "";
@@ -301,7 +303,13 @@ body {
 .score.can-scroll .score-caption { color: var(--ink-soft); }
 @media (max-width: 560px) {
   .score-inner { width: 175%; } /* notes get real spacing on small screens */
-  .machine { width: min(94vw, max(280px, 100svh - 380px)); }
+  /* tighten the air above the machine so the tape still peeks over the fold */
+  .hero { margin-top: 8px; }
+  .machine { margin-top: 10px; }
+  .deck-feed { padding: 8px 14px 10px; }
+  .rail { padding: 8px 10px 7px; }
+  .slot { padding-top: 9px; padding-bottom: 9px; }
+  .score { height: 69px; }
 }
 .score-rule {
   position: absolute; left: 0; right: 0; top: 50%;
@@ -348,7 +356,7 @@ body {
   font-size: 12px; letter-spacing: 0.14em; color: var(--dim);
   text-align: center; padding: 0 12px;
 }
-.score-hint span { background: #ece3d2; padding: 3px 10px; white-space: nowrap; }
+.score-hint span { background: #ece3d2; padding: 3px 10px; max-width: 88%; }
 
 /* ── the control deck: walnut plates, brass fittings, real travel ──
    (below 900px .deck-aux is display:contents so pair/foot join the
@@ -989,18 +997,14 @@ body {
 .guide-skip:hover { color: var(--ember); }
 .guide-skip-floating {
   position: fixed;
-  bottom: 18px; right: 18px;
-  padding: 8px 14px;
+  left: 0; top: 0;
+  padding: 6px 12px;
   border: 1px solid rgba(107, 92, 74, 0.45);
   border-radius: 999px;
   background: var(--bone);
   text-decoration: none;
   box-shadow: 0 4px 14px -6px rgba(50, 32, 12, 0.4);
   pointer-events: auto;
-}
-@media (min-width: 900px) {
-  /* clear of the fixed footer line */
-  .guide-skip-floating { bottom: 58px; right: 22px; }
 }
 
 /* score scrub head + replay key */
@@ -1128,21 +1132,17 @@ body {
   padding: 0 2px 2px;
 }
 
-@media (max-width: 380px) {
-  .deck-foot { justify-content: center; }
-  .deck-foot .deck-spec { display: none; }
-}
 @media (max-width: 560px) {
   .score-caption { font-size: 12px; letter-spacing: 0.08em; }
   .score-hint { font-size: 12px; letter-spacing: 0.1em; }
-  .plunger-cap { min-height: 58px; }
+  .plunger-cap { min-height: 50px; }
   .deck-foot .deck-spec { font-size: 8.5px; letter-spacing: 0.14em; }
   .share-plate { padding: 26px 18px 18px; }
   .share-perf { margin: -26px -18px 0; }
   .guide-tip p { font-size: 12px; }
 }
 @media (max-height: 700px) {
-  .hero { margin-top: 14px; }
+  .hero { margin-top: 8px; }
   .epithet { margin-top: 6px; }
   .score { height: 62px; }
   .footer { padding-top: 18px; }

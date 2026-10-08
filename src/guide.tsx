@@ -34,7 +34,8 @@ const STEPS: Step[] = [
     text: 'Type any word — the machine eats the letters.',
     timeout: 16000,
     onlyPhase: 'idle',
-    prefer: ['aside', 'above', 'below'],
+    // below before above: above the slot is the rail the word stamps into
+    prefer: ['aside', 'below', 'above'],
   },
   {
     sel: '.plunger',
@@ -70,8 +71,10 @@ export function Guide({ phase, typed, scrubbed, onDone, suspended }: Props) {
   const [ix, setIx] = useState(0);
   const [booted, setBooted] = useState(false);
   const [view, setView] = useState<{ ix: number; x: number; y: number; w: number; h: number } | null>(null);
+  const [skipPos, setSkipPos] = useState<{ x: number; y: number } | null>(null);
   const done = useRef(false);
   const tipRef = useRef<HTMLDivElement>(null);
+  const skipRef = useRef<HTMLButtonElement>(null);
   const [fading, setFading] = useState(false);
 
   const dismiss = () => {
@@ -128,6 +131,19 @@ export function Guide({ phase, typed, scrubbed, onDone, suspended }: Props) {
         setView({ ix, x: r.left, y: r.top, w: r.width, h: r.height });
       } else {
         setView(null);
+        // Between steps the loose skip pill docks in the masthead band —
+        // measured against the serial cluster so it can never sit on a
+        // machine control. Off-screen masthead (scrolled) → no pill.
+        const anchor = document.querySelector('.mast-right');
+        const pill = skipRef.current;
+        if (anchor && pill) {
+          const a = anchor.getBoundingClientRect();
+          const w = pill.offsetWidth;
+          const x = a.left - w - 14;
+          setSkipPos(a.bottom > 0 && x >= 8 ? { x, y: a.top + (a.height - pill.offsetHeight) / 2 } : null);
+        } else {
+          setSkipPos(null);
+        }
       }
       raf = requestAnimationFrame(tick);
     };
@@ -139,8 +155,9 @@ export function Guide({ phase, typed, scrubbed, onDone, suspended }: Props) {
 
   // The bridging pill sits just under the word slot.
   if (!booted) {
+    const below = window.innerWidth < 560; // above the slot is the letter rail on phones
     return rect ? (
-      <div className="guide-mini" style={{ left: rect.x + rect.w / 2, top: rect.y - 34 }}>
+      <div className="guide-mini" style={{ left: rect.x + rect.w / 2, top: below ? rect.y + rect.h + 10 : rect.y - 34 }}>
         type a word, any word
       </div>
     ) : null;
@@ -195,7 +212,12 @@ export function Guide({ phase, typed, scrubbed, onDone, suspended }: Props) {
         </div>
       )}
       {!rect && (
-        <button className="guide-skip guide-skip-floating" onClick={dismiss}>
+        <button
+          ref={skipRef}
+          className="guide-skip guide-skip-floating"
+          style={skipPos ? { left: skipPos.x, top: skipPos.y } : { visibility: 'hidden' }}
+          onClick={dismiss}
+        >
           skip intro
         </button>
       )}

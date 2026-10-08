@@ -64,10 +64,20 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
     });
     if (hit) onScrub();
     setScrubX(fx);
+    // hugging an edge glides the paper along, so the whole strip stays
+    // reachable even though the inner run is wider than the window
+    const rail = strip.current;
+    if (rail) {
+      const rr = rail.getBoundingClientRect();
+      const edge = 34;
+      if (e.clientX < rr.left + edge) rail.scrollLeft -= 26;
+      else if (e.clientX > rr.right - edge) rail.scrollLeft += 26;
+    }
   };
 
   const scrubDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest('button')) return;
+    // a drag that begins on a dot is a scrub too — the note under the
+    // finger rings from scrubTo, so tap-to-play survives on its own
     audioEngine.unlock();
     scrubbing.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -114,7 +124,15 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
     audioEngine.unlock();
     audioEngine.setKit(song.kit);
     pb.ping(ev.pegId, ev.midi, 0.8);
-    setScrubX(2 + (ev.t / Math.max(lastT, 0.001)) * 96);
+    const px = 2 + (ev.t / Math.max(lastT, 0.001)) * 96;
+    setScrubX(px);
+    // keep the stepped dot in view when the paper runs past the window
+    const rail = strip.current;
+    const inner = rail?.firstElementChild as HTMLElement | null;
+    if (rail && inner) {
+      const target = (px / 100) * inner.offsetWidth;
+      rail.scrollTo({ left: Math.max(0, target - rail.clientWidth / 2), behavior: 'smooth' });
+    }
     onScrub();
     window.setTimeout(() => setScrubX(null), 300);
   };
