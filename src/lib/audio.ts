@@ -51,22 +51,61 @@ export class AudioEngine {
       this.wet.connect(wetGain).connect(this.master);
       this.watchVisibility();
     }
+    // Must stay synchronous in the user-gesture stack on iOS Safari.
+    this.primeAudioSession();
     this.resume();
+    this.primeSilent();
+  }
+
+  /** Prefer the media playback session so the mute switch does not swallow Web Audio. */
+  private primeAudioSession() {
+    try {
+      const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+      if (session && session.type !== 'playback') session.type = 'playback';
+    } catch {
+      /* audioSession is still experimental */
+    }
   }
 
   private resume() {
     const ctx = this.ctx;
-    if (!ctx || ctx.state !== 'suspended') return;
+    if (!ctx) return;
+    // WebKit adds "interrupted" after backgrounding; resume() is required there too.
+    const state = ctx.state as AudioContextState | 'interrupted';
+    if (state !== 'suspended' && state !== 'interrupted') return;
     void ctx.resume().catch(() => {
       // Safari rejects when the user-activation window already closed.
     });
+  }
+
+  /** Empty buffer start is what actually unlocks iOS after resume(). */
+  private primeSilent() {
+    const ctx = this.ctx;
+    const master = this.master;
+    if (!ctx || !master) return;
+    try {
+      const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(master);
+      src.start(0);
+    } catch {
+      /* ignore */
+    }
   }
 
   private watchVisibility() {
     if (this.listening || typeof document === 'undefined') return;
     this.listening = true;
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') this.resume();
+      if (document.visibilityState !== 'visible' || !this.ctx) return;
+      // WebKit sometimes needs suspend→resume after returning from background.
+      const ctx = this.ctx;
+      const state = ctx.state as AudioContextState | 'interrupted';
+      if (state === 'running') return;
+      void ctx.suspend().catch(() => { /* ignore */ }).then(() => {
+        window.setTimeout(() => this.resume(), 200);
+      });
     });
   }
 
