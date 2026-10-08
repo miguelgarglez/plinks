@@ -214,13 +214,17 @@ function draw(ctx: CanvasRenderingContext2D, W: number, song: Song, pb: Playback
       ctx.beginPath();
       ctx.arc(px - p.r * S * 0.28, py - p.r * S * 0.3, p.r * S * 0.26, 0, Math.PI * 2);
       ctx.fill();
-      // residue ember on struck pegs
+      // residue ember on struck pegs (shows whenever the flash has faded)
       const hit = pb.hits.get(p.id);
-      if (hit !== undefined && ft === undefined) {
+      if (hit !== undefined && glow <= 0.01) {
         ctx.fillStyle = col;
-        ctx.globalAlpha = 0.85;
+        ctx.globalAlpha = 0.32;
         ctx.beginPath();
-        ctx.arc(px, py, p.r * S * 0.34, 0, Math.PI * 2);
+        ctx.arc(px, py, p.r * S * 1.15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.arc(px, py, p.r * S * 0.62, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
@@ -257,7 +261,7 @@ function draw(ctx: CanvasRenderingContext2D, W: number, song: Song, pb: Playback
   if (pb.marble) {
     marbleBall(ctx, pb.marble.x * S, pb.marble.y * S, board.marbleR * S);
   } else if (pb.phase === 'idle') {
-    const bob = Math.sin(now * 1.8) * 0.0015;
+    const bob = pb.reduced ? 0 : Math.sin(now * 1.8) * 0.0015;
     marbleBall(ctx, hx, (hy + 0.02 + bob) * S, board.marbleR * S);
   }
 }

@@ -8,21 +8,31 @@ import { KITS, SCALES } from './lib/music';
 import { rng } from './lib/hash';
 
 function pathWord(): { word: string; valid: boolean } {
-  const raw = decodeURIComponent(window.location.pathname.replace(/^\//, ''));
+  let raw = '';
+  try {
+    raw = decodeURIComponent(window.location.pathname.replace(/^\//, ''));
+  } catch {
+    return { word: 'plinks', valid: false };
+  }
   if (!raw) return { word: 'plinks', valid: true };
   const w = normalizeWord(raw);
   return { word: w || 'plinks', valid: !!w };
 }
 
+const MAX_TAKE = 99;
+function parseTake(search: string): number {
+  const t = parseInt(new URLSearchParams(search).get('take') ?? '1', 10);
+  return Number.isFinite(t) ? Math.min(Math.max(t, 1), MAX_TAKE) : 1;
+}
+
 export default function App() {
   const [route, setRoute] = useState(() => pathWord());
   const [input, setInput] = useState('');
-  const [take, setTake] = useState(() => {
-    const t = parseInt(new URLSearchParams(location.search).get('take') ?? '1', 10);
-    return Number.isFinite(t) && t >= 1 ? Math.min(t, 99) : 1;
-  });
+  const [take, setTake] = useState(() => parseTake(location.search));
   const [muted, setMuted] = useState(false);
   const [shareMsg, setShareMsg] = useState('');
+  const finePointer = useMemo(() => window.matchMedia('(pointer: fine)').matches, []);
+  const inputRef = useRef<HTMLInputElement>(null);
   const song = useMemo(() => songFor(route.word), [route.word]);
   const pb = usePlayback(song!, take);
   const lastActivity = useRef(performance.now() / 1000);
@@ -30,7 +40,7 @@ export default function App() {
   useEffect(() => {
     const onPop = () => {
       setRoute(pathWord());
-      setTake(parseInt(new URLSearchParams(location.search).get('take') ?? '1', 10) || 1);
+      setTake(parseTake(location.search));
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -51,30 +61,35 @@ export default function App() {
     return () => clearInterval(id);
   }, [song, pb]);
 
-  const navigate = useCallback((w: string, t = 1) => {
-    const norm = normalizeWord(w);
-    const url = `/${norm}${t > 1 ? `?take=${t}` : ''}`;
-    history.pushState(null, '', url);
-    setRoute({ word: norm || 'plinks', valid: !!norm });
-    setTake(t);
-    setShareMsg('');
-  }, []);
-
   const drop = useCallback(() => {
     lastActivity.current = performance.now() / 1000;
     pb.start();
   }, [pb]);
 
   const wantDrop = useRef(false);
+  const navigate = useCallback((w: string, t = 1, autoplay = false) => {
+    const norm = normalizeWord(w);
+    const url = `/${norm}${t > 1 ? `?take=${t}` : ''}`;
+    if (norm !== route.word || t !== take) {
+      history.pushState(null, '', url);
+      if (autoplay) wantDrop.current = true; // play once the new drop is built
+      setRoute({ word: norm || 'plinks', valid: !!norm });
+      setTake(t);
+      setShareMsg('');
+    } else if (autoplay) {
+      drop();
+    }
+  }, [route.word, take, drop]);
+
   const anotherTake = useCallback(() => {
-    const next = take + 1;
+    const next = Math.min(take + 1, MAX_TAKE);
     history.replaceState(null, '', `/${route.word}?take=${next}`);
     wantDrop.current = true;
     setTake(next);
     lastActivity.current = performance.now() / 1000;
   }, [take, route.word]);
 
-  // when the take changes the drop rebuilds; if the user asked, play it
+  // when the song or take changes the drop rebuilds; if the user asked, play it
   useEffect(() => {
     if (wantDrop.current && pb.phase === 'idle') {
       wantDrop.current = false;
@@ -84,8 +99,9 @@ export default function App() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!finePointer) inputRef.current?.blur(); // hand the view back to the board
     if (!input.trim()) { drop(); return; }
-    navigate(input, 1);
+    navigate(input, 1, true);
   };
 
   const toggleMute = () => {
@@ -99,7 +115,8 @@ export default function App() {
   const doShare = async () => {
     if (!song) return;
     try {
-      const how = await shareSong(song, pb.drop);
+      const how = await shareSong(song, pb.drop, take);
+      if (how === 'cancelled') return;
       setShareMsg(how === 'shared' ? 'sent' : how === 'copied' ? 'link copied' : 'card saved');
     } catch {
       setShareMsg('sharing failed');
@@ -154,15 +171,17 @@ export default function App() {
 
       <form className="controls" onSubmit={onSubmit}>
         <input
+          ref={inputRef}
           className="word-input"
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="type a word"
           aria-label="A word to compose a song from"
-          autoFocus
+          autoFocus={finePointer}
           maxLength={32}
           spellCheck={false}
           autoComplete="off"
+          enterKeyHint="go"
         />
         <button type="submit" className="btn primary">
           {pb.phase === 'dropping' ? 'falling…' : input.trim() ? 'compose' : 'drop'}
@@ -171,17 +190,25 @@ export default function App() {
           take {take} ↺
         </button>
         <button type="button" className="btn" onClick={doShare}>share</button>
-        <button
-          type="button"
-          className={`mute ${muted ? 'is-muted' : ''}`}
-          onClick={toggleMute}
-          aria-label={muted ? 'Unmute' : 'Mute'}
-          aria-pressed={muted}
-        >
-          <span className="mute-dot" />
-        </button>
+        <span className="mute-wrap">
+          <button
+            type="button"
+            className={`mute ${muted ? 'is-muted' : ''}`}
+            onClick={toggleMute}
+            aria-label={muted ? 'Unmute' : 'Mute'}
+            aria-pressed={muted}
+          >
+            <span className="mute-dot" />
+          </button>
+          <span className="mute-tag">sound</span>
+        </span>
       </form>
       {shareMsg && <p className="share-msg" role="status">{shareMsg}</p>}
+      <p className="sr-only" role="status">
+        {pb.landedAt !== null && pb.phase === 'settled'
+          ? `The marble landed in pocket ${pb.drop.basin + 1}; the melody had ${pb.drop.events.length} notes.`
+          : pb.phase === 'dropping' ? 'The marble is falling.' : ''}
+      </p>
 
       <footer className="footer">
         <span>no network · no account · just physics</span>

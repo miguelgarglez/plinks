@@ -4,7 +4,7 @@ import { KITS, SCALES } from './lib/music';
 import { ramp } from './board';
 
 // Share card: 1200×630 canvas — word, score, serial, in the product identity.
-export async function shareCardPng(song: Song, drop: DropResult): Promise<Blob> {
+export async function shareCardPng(song: Song, drop: DropResult, take: number): Promise<Blob> {
   await document.fonts.ready;
   const W = 1200, H = 630;
   const cv = document.createElement('canvas');
@@ -20,7 +20,7 @@ export async function shareCardPng(song: Song, drop: DropResult): Promise<Blob> 
   ctx.strokeRect(28, 28, W - 56, H - 56);
 
   // masthead
-  ctx.fillStyle = '#8a7a66';
+  ctx.fillStyle = '#6b5c4a';
   ctx.font = '20px "Space Mono", monospace';
   ctx.textAlign = 'left';
   ctx.fillText('P L I N K S', 60, 82);
@@ -30,20 +30,27 @@ export async function shareCardPng(song: Song, drop: DropResult): Promise<Blob> 
   ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(60, 104); ctx.lineTo(W - 60, 104); ctx.stroke();
 
-  // title
+  // title — shrink until it fits the plate
   ctx.textAlign = 'center';
   ctx.fillStyle = '#241b10';
-  const titleSize = Math.min(92, 620 / Math.max(4, song.word.length) + 34);
-  ctx.font = `italic 560 ${titleSize}px Fraunces, serif`;
-  ctx.fillText(`the song of ${song.word}`, W / 2, 230);
+  const title = `the song of ${song.word}`;
+  let titleSize = 92;
+  do {
+    ctx.font = `italic 560 ${titleSize}px Fraunces, serif`;
+    titleSize -= 4;
+  } while (titleSize > 24 && ctx.measureText(title).width > W - 160);
+  ctx.fillText(title, W / 2, 230);
 
   // epithet + meta
   ctx.fillStyle = '#5a4a34';
   ctx.font = 'italic 400 28px Fraunces, serif';
   ctx.fillText(song.epithet, W / 2, 285);
-  ctx.fillStyle = '#8a7a66';
+  ctx.fillStyle = '#6b5c4a';
   ctx.font = '19px "Space Mono", monospace';
-  ctx.fillText(`no. ${song.serial} · ${KITS[song.kit].name} · ${SCALES[song.scale].name} · ${song.bpm} bpm`, W / 2, 330);
+  ctx.fillText(
+    `no. ${song.serial} · ${KITS[song.kit].name} · ${SCALES[song.scale].name} · ${song.bpm} bpm${take > 1 ? ` · take ${take}` : ''}`,
+    W / 2, 330,
+  );
 
   // score rail
   const evs = drop.events;
@@ -63,35 +70,46 @@ export async function shareCardPng(song: Song, drop: DropResult): Promise<Blob> 
     ctx.fill();
   }
 
-  // url
+  // url — the exact route, so the card reproduces this take
   ctx.fillStyle = '#241b10';
   ctx.font = '600 22px "Space Mono", monospace';
-  ctx.fillText(`plinks.vercel.app/${song.word}`, W / 2, 556);
+  ctx.fillText(`${location.host}/${song.word}${take > 1 ? `?take=${take}` : ''}`, W / 2, 556);
 
   const blob = await new Promise<Blob | null>(res => cv.toBlob(res, 'image/png'));
   if (!blob) throw new Error('card render failed');
   return blob;
 }
 
-export async function shareSong(song: Song, drop: DropResult): Promise<'shared' | 'copied' | 'downloaded'> {
-  const url = `${location.origin}/${song.word}${location.search}`;
+export async function shareSong(
+  song: Song,
+  drop: DropResult,
+  take: number,
+): Promise<'shared' | 'copied' | 'downloaded' | 'cancelled'> {
+  const url = `${location.origin}/${song.word}${take > 1 ? `?take=${take}` : ''}`;
   try {
-    const blob = await shareCardPng(song, drop);
+    const blob = await shareCardPng(song, drop, take);
     const file = new File([blob], `the-song-of-${song.word}.png`, { type: 'image/png' });
     if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title: `the song of ${song.word}`, url });
-      return 'shared';
+      try {
+        await navigator.share({ files: [file], title: `the song of ${song.word}`, url });
+        return 'shared';
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return 'cancelled';
+        // other share failures fall through to clipboard
+      }
     }
-  } catch { /* fall through to clipboard */ }
+  } catch { /* card render failed; still offer the link */ }
   try {
     await navigator.clipboard.writeText(url);
     return 'copied';
   } catch {
-    const blob = await shareCardPng(song, drop);
+    const blob = await shareCardPng(song, drop, take);
+    const href = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href = href;
     a.download = `the-song-of-${song.word}.png`;
     a.click();
+    setTimeout(() => URL.revokeObjectURL(href), 4000);
     return 'downloaded';
   }
 }

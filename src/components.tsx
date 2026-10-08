@@ -53,7 +53,7 @@ export function ScoreRail({ song, drop, pb }: { song: Song; drop: DropResult; pb
             onClick={() => {
               audioEngine.unlock();
               audioEngine.setKit(song.kit);
-              audioEngine.strike(e.midi, 0.8);
+              pb.ping(e.pegId, e.midi, 0.8);
             }}
             aria-label={`Replay note ${midiName(e.midi)}`}
             disabled={!on && pb.phase !== 'settled'}
@@ -62,6 +62,9 @@ export function ScoreRail({ song, drop, pb }: { song: Song; drop: DropResult; pb
       })}
       {pb.phase === 'idle' && evs.length > 0 && (
         <div className="score-hint">the score appears as the marble plays</div>
+      )}
+      {pb.phase === 'settled' && (
+        <div className="score-caption">tap a note to hear it again</div>
       )}
     </div>
   );

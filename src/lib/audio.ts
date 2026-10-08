@@ -8,6 +8,7 @@ export class AudioEngine {
   private master: GainNode | null = null;
   private wet: ConvolverNode | null = null;
   private buffers = new Map<string, AudioBuffer>();
+  private live = new Set<AudioBufferSourceNode>();
   private kit: KitName = 'kalimba';
   private _muted = false;
 
@@ -102,7 +103,17 @@ export class AudioEngine {
     const send = ctx.createGain();
     send.gain.value = 0.9;
     g.connect(send).connect(this.wet);
+    this.live.add(src);
+    src.onended = () => this.live.delete(src);
     src.start(t);
+  }
+
+  // cancel every scheduled/playing pluck — used when a new drop supersedes one
+  stopAll() {
+    for (const src of this.live) {
+      try { src.onended = null; src.stop(); } catch { /* already stopped */ }
+    }
+    this.live.clear();
   }
 
   // wooden knock for basin landing + UI thunks

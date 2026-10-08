@@ -31,7 +31,8 @@ const DT = 1 / 240;
 const GRAVITY = 3.0;
 const REST = 0.6;      // peg restitution
 const WALL_REST = 0.5;
-const MAX_T = 4.2;
+const SOFT_T = 3.6;    // past this the marble drops heavier: no endless hovering
+const MAX_T = 10;
 
 // Fixed-timestep marble sim. Only + - * / and sqrt in the loop: IEEE-exact ops,
 // so the same seed produces the same song on the same engine.
@@ -59,26 +60,31 @@ export function simulate(song: Song, take: number): DropResult {
   let settled = false;
   let gridCursor = -1;
   let stillFor = 0;
+  let bestY = 0;
+  let stuckFor = 0;
 
   while (t < MAX_T && !settled) {
-    vy += GRAVITY * DT;
+    // past SOFT_T the marble gets heavier: hovering between pegs resolves
+    const g = t > SOFT_T ? GRAVITY * (1 + (t - SOFT_T) * 0.9) : GRAVITY;
+    vy += g * DT;
     // mild air drag keeps energy bounded
     vx *= 1 - 0.012 * DT;
     vy *= 1 - 0.02 * DT;
     x += vx * DT;
     y += vy * DT;
 
-    // stuck failsafe: if the marble is barely moving for a stretch,
-    // give it a deterministic nudge toward the nearest gap
+    // stuck failsafes: near-stillness, and sideways oscillation without descent
     if (vx * vx + vy * vy < 0.0006) {
       stillFor += DT;
-      if (stillFor > 0.3) {
-        vx += (kick[Math.floor((x * pegs.length)) % pegs.length] >= 0 ? 1 : -1) * 0.35;
-        vy += 0.1;
-        stillFor = 0;
-      }
     } else {
       stillFor = 0;
+    }
+    if (y > bestY + 0.004) { bestY = y; stuckFor = 0; } else { stuckFor += DT; }
+    if (stillFor > 0.3 || stuckFor > 0.65) {
+      vx += (kick[Math.abs(Math.floor(x * pegs.length)) % pegs.length] >= 0 ? 1 : -1) * 0.42;
+      vy += 0.15;
+      stillFor = 0;
+      stuckFor = 0;
     }
 
     // walls
@@ -132,6 +138,25 @@ export function simulate(song: Song, take: number): DropResult {
       }
     }
 
+    if (Math.round(t / DT) % 4 === 0) samples.push({ t, x, y, vx, vy });
+    t += DT;
+  }
+
+  // drain failsafe (never reached in practice): let a still-airborne marble
+  // slide to the floor honestly, so the landing note is a real landing
+  while (!settled && t < MAX_T + 1.6) {
+    vy += GRAVITY * 2.5 * DT;
+    vx *= 1 - 0.4 * DT;
+    x += vx * DT;
+    y += vy * DT;
+    if (x < mr) { x = mr; vx = -vx * WALL_REST; }
+    else if (x > 1 - mr) { x = 1 - mr; vx = -vx * WALL_REST; }
+    if (y > 0.97) {
+      y = 0.97;
+      vy = -vy * 0.22;
+      vx *= 0.75;
+      if (Math.abs(vy) < 0.06 && Math.abs(vx) < 0.07) { vy = 0; settled = true; }
+    }
     if (Math.round(t / DT) % 4 === 0) samples.push({ t, x, y, vx, vy });
     t += DT;
   }

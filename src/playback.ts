@@ -8,19 +8,22 @@ export type Phase = 'idle' | 'dropping' | 'settled';
 export interface Glyph { x: number; y: number; midi: number; t0: number; }
 export interface TrailPt { x: number; y: number; t: number; }
 
+const LEAD = 0.12; // audio lead-in so flashes land on the audible note
+
 export interface Playback {
   phase: Phase;
   drop: DropResult;
   marble: { x: number; y: number; vx: number; vy: number } | null;
-  flashes: Map<number, number>;
+  flashes: Map<number, number>;   // pegId -> absolute time of last flash
   glyphs: Glyph[];
   trail: TrailPt[];
-  hits: Map<number, number>; // pegId -> struck at t (persists after settle)
+  hits: Map<number, number>;      // pegId -> absolute time struck (persists)
   basinFlash: number | null;
   landedAt: number | null;
-  progress: number;          // 0..1 playback progress for score reveal
+  progress: number;               // 0..1 playback progress for score reveal
+  reduced: boolean;               // prefers-reduced-motion
   start: () => void;
-  ping: (pegId: number, midi: number) => void;
+  ping: (pegId: number, midi: number, vel?: number) => void;
 }
 
 export const audioEngine = new AudioEngine();
@@ -28,6 +31,7 @@ export const audioEngine = new AudioEngine();
 export function usePlayback(song: Song, take: number): Playback {
   const drop = useMemo(() => simulate(song, take), [song, take]);
   const [phase, setPhase] = useState<Phase>('idle');
+  const [run, setRun] = useState(0);
   const [, force] = useState(0);
   const st = useRef({
     t0: 0,
@@ -42,9 +46,10 @@ export function usePlayback(song: Song, take: number): Playback {
     raf: 0,
   });
 
-  // reset visuals when the song/take changes
+  // reset visuals and silence audio when the song/take changes
   useEffect(() => {
     const s = st.current;
+    audioEngine.stopAll();
     s.marble = null;
     s.flashes.clear();
     s.glyphs = [];
@@ -56,11 +61,13 @@ export function usePlayback(song: Song, take: number): Playback {
     setPhase('idle');
   }, [drop]);
 
-  const reduced = useRef(false);
+  useEffect(() => () => audioEngine.stopAll(), []);
+
+  const [reduced, setReduced] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    reduced.current = mq.matches;
-    const fn = (e: MediaQueryListEvent) => { reduced.current = e.matches; };
+    setReduced(mq.matches);
+    const fn = (e: MediaQueryListEvent) => setReduced(e.matches);
     mq.addEventListener('change', fn);
     return () => mq.removeEventListener('change', fn);
   }, []);
@@ -68,6 +75,7 @@ export function usePlayback(song: Song, take: number): Playback {
   const start = useCallback(() => {
     audioEngine.unlock();
     audioEngine.setKit(song.kit);
+    audioEngine.stopAll(); // a re-drop supersedes any melody still ringing
     const s = st.current;
     s.t0 = performance.now() / 1000;
     s.marble = null;
@@ -77,7 +85,8 @@ export function usePlayback(song: Song, take: number): Playback {
     s.basinFlash = null;
     s.landedAt = null;
     s.progress = 0;
-    audioEngine.playEvents(drop.events, audioEngine.now() + 0.12);
+    audioEngine.playEvents(drop.events, audioEngine.now() + LEAD);
+    setRun(r => r + 1); // restarts the tick loop even if already dropping
     setPhase('dropping');
   }, [drop, song.kit]);
 
@@ -85,39 +94,41 @@ export function usePlayback(song: Song, take: number): Playback {
     if (phase !== 'dropping') return;
     const s = st.current;
     const samples = drop.samples;
-    const compress = reduced.current ? 0.42 : 1; // reduced motion: quicker traversal
     let si = 0;
+    let ei = 0; // event cursor — every strike lights its peg, repeats included
     const tick = () => {
-      const t = performance.now() / 1000 - s.t0;
-      const ts = t / compress;
+      const now = performance.now() / 1000;
+      const ts = now - s.t0;
       while (si < samples.length - 2 && samples[si + 1].t <= ts) si++;
       const a = samples[si], b = samples[Math.min(si + 1, samples.length - 1)];
       const f = b.t > a.t ? Math.min(1, Math.max(0, (ts - a.t) / (b.t - a.t))) : 1;
       s.marble = { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, vx: a.vx, vy: a.vy };
-      s.trail.push({ x: s.marble.x, y: s.marble.y, t });
-      if (s.trail.length > 36) s.trail.shift();
+      if (!reduced) {
+        s.trail.push({ x: s.marble.x, y: s.marble.y, t: now });
+        if (s.trail.length > 36) s.trail.shift();
+      }
 
-      for (const e of drop.events) {
-        // flashes follow the *audible* note (grid time), so sound and light agree
-        const ft = reduced.current ? e.t : e.t;
-        if (ft <= ts && e.pegId >= 0 && !s.flashes.has(e.pegId)) {
-          s.flashes.set(e.pegId, t);
-          s.hits.set(e.pegId, t);
-          s.glyphs.push({ x: e.x, y: e.y, midi: e.midi, t0: t });
+      // flashes land on the *audible* (quantized) note so sound and light agree
+      while (ei < drop.events.length && drop.events[ei].tGrid + LEAD <= ts) {
+        const e = drop.events[ei++];
+        if (e.pegId >= 0) {
+          s.flashes.set(e.pegId, now);
+          s.hits.set(e.pegId, now);
+          if (!reduced) s.glyphs.push({ x: e.x, y: e.y, midi: e.midi, t0: now });
           if (navigator.vibrate) navigator.vibrate(3);
         }
       }
-      const lastGrid = drop.events.length ? drop.events[drop.events.length - 1].tGrid : 1;
+      const lastGrid = drop.events.length ? drop.events[drop.events.length - 1].tGrid + LEAD : 1;
       s.progress = Math.min(1, ts / Math.max(0.001, lastGrid));
       const land = drop.events[drop.events.length - 1];
       if (land && land.t <= ts && s.basinFlash === null) {
-        s.basinFlash = t;
-        s.landedAt = t;
+        s.basinFlash = now;
+        s.landedAt = now;
         audioEngine.knock(0, 150, 0.5);
         if (navigator.vibrate) navigator.vibrate(12);
       }
       force(v => v + 1);
-      if (t < drop.duration * compress + 0.5) {
+      if (ts < drop.duration + 0.5) {
         s.raf = requestAnimationFrame(tick);
       } else {
         setPhase('settled');
@@ -125,10 +136,10 @@ export function usePlayback(song: Song, take: number): Playback {
     };
     s.raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(s.raf);
-  }, [phase, drop]);
+  }, [phase, run, drop, reduced]);
 
   return {
-    phase, drop,
+    phase, drop, reduced,
     marble: st.current.marble,
     flashes: st.current.flashes,
     glyphs: st.current.glyphs,
@@ -138,11 +149,11 @@ export function usePlayback(song: Song, take: number): Playback {
     landedAt: st.current.landedAt,
     progress: st.current.progress,
     start,
-    ping: (pegId: number, midi: number) => {
-      if (!audioEngine.ready || audioEngine.muted) return;
-      const t = performance.now() / 1000;
-      st.current.flashes.set(pegId, t);
-      audioEngine.strike(midi, 0.18);
+    ping: (pegId: number, midi: number, vel = 0.18) => {
+      const now = performance.now() / 1000;
+      if (pegId >= 0) st.current.flashes.set(pegId, now);
+      else st.current.basinFlash = now; // replaying the tonic lights the basin
+      if (audioEngine.ready && !audioEngine.muted) audioEngine.strike(midi, vel);
     },
   };
 }

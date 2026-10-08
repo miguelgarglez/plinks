@@ -3,7 +3,7 @@
   --bone-deep: #e6ddcd;
   --ink: #241b10;
   --ink-soft: #4a3b28;
-  --dim: #8a7a66;
+  --dim: #6b5c4a;
   --brass: #C19A4A;
   --brass-dark: #7a5c22;
   --ember: #E4573C;
@@ -72,6 +72,7 @@ body {
   font-weight: 600;
   color: var(--ink);
   display: inline-block;
+  overflow-wrap: anywhere;
 }
 .word-em { animation: wordIn 500ms var(--ease-out) both; }
 @keyframes wordIn {
@@ -157,11 +158,12 @@ body {
 }
 .score-dot {
   position: absolute;
-  width: 9px; height: 9px;
+  width: 22px; height: 22px;
   border-radius: 50%;
-  border: none;
+  border: 6px solid transparent;
   padding: 0;
   background: var(--dot-color);
+  background-clip: padding-box;
   transform: translate(-50%, -50%) scale(0.4);
   cursor: pointer;
   transition: opacity 240ms var(--ease-out), transform 240ms var(--ease-out), box-shadow 160ms;
@@ -179,7 +181,7 @@ body {
 }
 .score-dot:hover { box-shadow: 0 0 0 3px rgba(193,154,74,0.35); }
 .score-dot:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
-.score-dot-tonic { width: 12px; height: 12px; }
+.score-dot-tonic { border-width: 4.5px; }
 .score-dot:disabled { cursor: default; }
 .score-hint {
   position: absolute; inset: 0;
@@ -199,7 +201,7 @@ body {
 }
 .word-input {
   font-family: "Space Mono", monospace;
-  font-size: 15px;
+  font-size: 16px;
   padding: 12px 14px;
   min-width: min(220px, 46vw);
   color: var(--ink);
@@ -233,6 +235,7 @@ body {
 .btn:disabled { opacity: 0.45; cursor: default; }
 .btn:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
 .btn.primary {
+  min-width: 7.6em;
   background: var(--ink);
   color: var(--bone);
   box-shadow: 0 3px 0 rgba(0,0,0,0.25);
@@ -317,4 +320,31 @@ body {
   .rail-letter, .word-em, .share-msg { animation-duration: 1ms; }
   .score-dot, .score-dot.on { transition-duration: 1ms; animation: none; }
   .score-playhead { transition: none; }
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  clip: rect(0 0 0 0); clip-path: inset(50%);
+  overflow: hidden; white-space: nowrap;
+}
+
+.mute-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.mute-tag {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.score-caption {
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; justify-content: center;
+  font-size: 10px; letter-spacing: 0.14em; color: var(--dim);
+  pointer-events: none;
+  padding-bottom: 2px;
 }
