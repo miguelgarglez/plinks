@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import type { Song } from './lib/song';
 import { simulate, type DropResult } from './lib/physics';
 import { AudioEngine } from './lib/audio';
+import { haptic } from './lib/haptics';
 
 export type Phase = 'idle' | 'dropping' | 'replaying' | 'settled';
 
@@ -162,13 +163,13 @@ export function usePlayback(song: Song, take: number): Playback {
           } else if (s.mode === 'replay') {
             s.wobs.set(e.pegId, { t0: now, nx: 0, ny: -1, amp: 0.5 });
           }
-          if (navigator.vibrate) navigator.vibrate(3);
+          haptic('note');
         } else {
           s.basinFlash = now;
           s.landedAt = now;
           audioEngine.knock(0, 150, 0.5);
           if (!reduced) s.shake.v = Math.min(0.016, s.shake.v + 0.011);
-          if (navigator.vibrate) navigator.vibrate(12);
+          haptic('tap');
         }
       }
       const lastT = drop.events.length ? drop.events[drop.events.length - 1].t : 1;

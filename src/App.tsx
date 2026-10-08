@@ -8,6 +8,7 @@ import { ShareCard } from './sharecard';
 import { Guide, guideSeen, markGuideSeen } from './guide';
 import { KITS, SCALES } from './lib/music';
 import { rng } from './lib/hash';
+import { haptic } from './lib/haptics';
 
 function pathWord(): { word: string; valid: boolean } {
   let raw = '';
@@ -71,6 +72,7 @@ export default function App() {
     if (pb.phase === 'dropping' || pb.phase === 'replaying') return;
     lastActivity.current = performance.now() / 1000;
     audioEngine.unlock();
+    haptic('drop');
     audioEngine.knock(0, 200, 0.3);
     window.clearTimeout(dropTimer.current);
     dropTimer.current = window.setTimeout(() => pb.start(), 140);
@@ -149,6 +151,7 @@ export default function App() {
   const openShare = () => {
     if (!song) return;
     audioEngine.unlock();
+    haptic('share');
     audioEngine.tear(); // the ticket shears off its perf edge
     lastActivity.current = performance.now() / 1000;
     setShowCard(true);

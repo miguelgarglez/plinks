@@ -13,7 +13,8 @@
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource/space-mono": "^5.3.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "web-haptics": "^0.0.6"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
