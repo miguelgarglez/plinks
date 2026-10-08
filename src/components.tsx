@@ -4,6 +4,8 @@ import type { DropResult } from './lib/physics';
 import type { Playback } from './playback';
 import { audioEngine } from './playback';
 import { midiName } from './lib/music';
+import { gestureDown, gestureFinish, gestureLost, gestureMove } from './lib/scrub';
+import type { Gesture, RailBox, ScrubHit } from './lib/scrub';
 import { ramp } from './board';
 
 // ── brass rail: the word stamps in, letter by letter ──
@@ -42,13 +44,11 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
   const lo = Math.min(...midis), hi = Math.max(...midis);
   const revealed = pb.phase === 'settled' ? Infinity : pb.progress * lastT;
 
-  const scrubbing = useRef(false);
+  const gesture = useRef<Gesture>({ kind: 'idle' });
+  const captId = useRef<number | null>(null);
+  const blockReplayClick = useRef(false);
   const [scrubX, setScrubX] = useState<number | null>(null);
   const rungAt = useRef(new Map<number, number>());
-  const lastClient = useRef<{ x: number; y: number } | null>(null);
-  // while the press began on a dot, only that note has rung; a drag of
-  // more than a few px graduates the gesture into a proximity scrub
-  const downDot = useRef<{ x: number; y: number } | null>(null);
   const strip = useRef<HTMLDivElement>(null);
 
   const playableNow = (ev: DropResult['events'][number]) =>
@@ -62,79 +62,102 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
     return true;
   };
 
-  // every note under the pointer x rings as it passes
-  const scrubAt = (clientX: number) => {
-    const inner = strip.current?.firstElementChild as HTMLElement | null;
-    if (!inner) return;
-    const rect = inner.getBoundingClientRect();
-    const fx = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+  const railBox = (): RailBox | null => {
+    const rail = strip.current;
+    if (!rail) return null;
+    const rr = rail.getBoundingClientRect();
+    return { left: rr.left, width: rr.width, scrollWidth: rail.scrollWidth, clientWidth: rail.clientWidth };
+  };
+
+  const ringAtProgress = (progress: number) => {
+    const fx = progress * 100;
     let hit = false;
     evs.forEach((ev, i) => {
       const ex = 2 + (ev.t / Math.max(lastT, 0.001)) * 96;
-      if (Math.abs(ex - fx) < 2.4 && ring(i)) hit = true;
+      if (Math.abs(ex - fx) < 2.8 && ring(i)) hit = true;
     });
     if (hit) onScrub();
     setScrubX(fx);
   };
 
-  // while scrubbing near an edge the paper keeps gliding on its own
-  const scrubAtRef = useRef(scrubAt);
-  useEffect(() => { scrubAtRef.current = scrubAt; });
-  useEffect(() => {
-    let raf = 0;
-    const tick = () => {
-      const rail = strip.current;
-      const lc = lastClient.current;
-      // downDot held: a still press on a note must not scroll the paper
-      if (rail && lc && scrubbing.current && !downDot.current) {
-        const rr = rail.getBoundingClientRect();
-        const edge = 36;
-        if (lc.x < rr.left + edge || lc.x > rr.right - edge) {
-          const before = rail.scrollLeft;
-          rail.scrollLeft += lc.x < rr.left + edge ? -3.4 : 3.4;
-          // at the scroll limit nothing moved — don't re-ring idle notes
-          if (rail.scrollLeft !== before) scrubAtRef.current(lc.x);
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  const holdPointer = (el: HTMLElement, pointerId: number) => {
+    try {
+      el.setPointerCapture(pointerId);
+      captId.current = pointerId;
+    } catch {
+      captId.current = null;
+    }
+  };
 
+  const dropHold = (el: HTMLElement) => {
+    const id = captId.current;
+    captId.current = null;
+    if (id !== null && el.hasPointerCapture(id)) el.releasePointerCapture(id);
+  };
+
+  const clearBead = () => setScrubX(null);
+
+  // Finger x in the visible rail maps across the whole melody, so late notes
+  // stay reachable on a tape wider than the phone. The paper scrolls under.
   const scrubDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // a press that begins on a dot rings exactly that note; the button's
-    // own click is captured away by the strip, so ring on down instead
+    const rail = railBox();
+    if (!rail) return;
+    blockReplayClick.current = false;
+    const target = e.target as HTMLElement;
+    const hit: ScrubHit = target.closest('.replay-key') ? 'replay' : target.closest('.score-dot') ? 'dot' : 'tape';
+    const next = gestureDown(e.pointerId, e.clientX, e.clientY, hit, rail);
+    gesture.current = next;
+    holdPointer(e.currentTarget, e.pointerId);
+    if (hit === 'replay') return;
+    // ring the pressed dot on the way down; travel past the slop becomes a scrub
     audioEngine.unlock();
-    scrubbing.current = true;
-    lastClient.current = { x: e.clientX, y: e.clientY };
-    e.currentTarget.setPointerCapture(e.pointerId);
-    const dotEl = (e.target as HTMLElement).closest('.score-dot');
-    const ix = dotEl ? Number((dotEl as HTMLElement).dataset.i) : NaN;
-    if (Number.isInteger(ix) && evs[ix]) {
-      downDot.current = { x: e.clientX, y: e.clientY };
-      if (ring(ix)) onScrub();
-      setScrubX(2 + (evs[ix].t / Math.max(lastT, 0.001)) * 96);
-    } else {
-      downDot.current = null;
-      scrubAt(e.clientX);
+    e.preventDefault();
+    if (next.kind === 'dot') {
+      const ix = Number((target.closest('.score-dot') as HTMLElement).dataset.i);
+      if (Number.isInteger(ix) && evs[ix] && ring(ix)) onScrub();
+      if (evs[ix]) setScrubX(2 + (evs[ix].t / Math.max(lastT, 0.001)) * 96);
+      return;
+    }
+    if (next.kind === 'scrub' && strip.current) {
+      strip.current.scrollLeft = next.scrollLeft;
+      ringAtProgress(next.progress);
     }
   };
   const scrubMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!scrubbing.current) return;
-    lastClient.current = { x: e.clientX, y: e.clientY };
-    const d = downDot.current;
-    if (d) {
-      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) return;
-      downDot.current = null; // enough travel — this is a scrub now
-    }
-    scrubAt(e.clientX);
+    const rail = railBox();
+    if (!rail || gesture.current.kind === 'idle') return;
+    const prev = gesture.current;
+    const next = gestureMove(prev, e.clientX, e.clientY, rail);
+    gesture.current = next;
+    if (prev.kind === 'replay' && next.kind === 'scrub') blockReplayClick.current = true;
+    if (next.kind !== 'scrub' || !strip.current) return;
+    audioEngine.unlock();
+    e.preventDefault();
+    strip.current.scrollLeft = next.scrollLeft;
+    ringAtProgress(next.progress);
   };
-  const scrubEnd = () => {
-    scrubbing.current = false;
-    downDot.current = null;
-    lastClient.current = null;
-    setScrubX(null);
+  const scrubUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const done = gestureFinish(gesture.current, 'up');
+    gesture.current = done.gesture;
+    dropHold(e.currentTarget);
+    clearBead();
+    if (!done.replay) return;
+    blockReplayClick.current = true;
+    audioEngine.unlock();
+    pb.replay();
+  };
+  const scrubCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    gesture.current = gestureFinish(gesture.current, 'cancel').gesture;
+    dropHold(e.currentTarget);
+    clearBead();
+  };
+  const scrubLost = (e: React.PointerEvent<HTMLDivElement>) => {
+    const still = e.currentTarget.hasPointerCapture(e.pointerId);
+    const next = gestureLost(gesture.current, e.pointerId, still);
+    if (next.kind !== 'idle') return;
+    gesture.current = next;
+    captId.current = null;
+    clearBead();
   };
 
   const [canScroll, setCanScroll] = useState(false);
@@ -182,7 +205,16 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
   };
 
   return (
-    <div className={`score${canScroll ? ' can-scroll' : ''}`} ref={strip} aria-label="The melody as a rail of notes">
+    <div
+      className={`score${canScroll ? ' can-scroll' : ''}`}
+      ref={strip}
+      aria-label="The melody as a rail of notes"
+      onPointerDown={scrubDown}
+      onPointerMove={scrubMove}
+      onPointerUp={scrubUp}
+      onPointerCancel={scrubCancel}
+      onLostPointerCapture={scrubLost}
+    >
       <div
         className="score-inner"
         role="slider"
@@ -192,10 +224,6 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
         aria-valuemax={evs.length || 1}
         aria-valuenow={Math.min(keyIx.current + 1, evs.length || 1)}
         onKeyDown={onKey}
-        onPointerDown={scrubDown}
-        onPointerMove={scrubMove}
-        onPointerUp={scrubEnd}
-        onPointerCancel={scrubEnd}
       >
       <div className="score-rule" />
       {playing && (
@@ -216,11 +244,6 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
             data-i={i}
             className={`score-dot${e.pegId === -1 ? ' score-dot-tonic' : ''}${on ? ' on' : ''}`}
             style={{ left: `${x}%`, top: `${y}%`, '--dot-color': e.pegId === -1 ? '#E4573C' : ramp(u) } as React.CSSProperties}
-            onClick={() => {
-              audioEngine.unlock();
-              audioEngine.setKit(song.kit);
-              pb.ping(e.pegId, e.midi, 0.8);
-            }}
             aria-label={`Replay note ${midiName(e.midi)}`}
             disabled={!on && pb.phase !== 'settled'}
           />
@@ -236,7 +259,15 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
           <button
             type="button"
             className="replay-key"
-            onClick={() => { audioEngine.unlock(); pb.replay(); }}
+            onClick={() => {
+              // pointerup already replayed, or the press turned into a scrub
+              if (blockReplayClick.current) {
+                blockReplayClick.current = false;
+                return;
+              }
+              audioEngine.unlock();
+              pb.replay();
+            }}
             aria-label="Replay the whole melody"
           >
             ⟲ replay

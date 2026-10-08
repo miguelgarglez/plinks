@@ -290,9 +290,8 @@ body {
     linear-gradient(180deg, #efe9db, #e2d8c2);
 }
 .score::-webkit-scrollbar { display: none; }
-/* vertical swipes scroll the page; horizontal drags scrub — the paper
-   glides under the pointer via edge auto-scroll, no native pan needed */
-.score-inner { position: relative; height: 100%; min-width: 100%; touch-action: pan-y; }
+/* own the gesture on the tape so a mild diagonal drag cannot become a page pan */
+.score-inner { position: relative; height: 100%; min-width: 100%; touch-action: none; }
 .score-inner:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; border-radius: 4px; }
 .score.can-scroll::after {
   content: "";
@@ -1039,6 +1038,8 @@ body {
 /* domed brass replay key — part of the machine, not a web pill */
 .replay-key {
   pointer-events: auto;
+  /* sits on the scrolling tape; auto touch-action pans the paper and cancels the pointer */
+  touch-action: none;
   font-family: "Space Mono", monospace;
   font-size: 9.5px;
   letter-spacing: 0.16em;
@@ -1132,8 +1133,9 @@ body {
 }
 
 @media (max-width: 560px) {
-  .score-caption { font-size: 12px; letter-spacing: 0.08em; }
+  .score-caption { font-size: 12px; letter-spacing: 0.08em; padding-bottom: 1px; }
   .score-hint { font-size: 12px; letter-spacing: 0.1em; }
+  .replay-key { padding: 6px 12px; font-size: 9.5px; }
   .slot { padding-top: 9px; padding-bottom: 9px; }
   .plunger-cap { min-height: 50px; }
   .deck-foot .deck-spec { font-size: 9px; letter-spacing: 0.12em; }
