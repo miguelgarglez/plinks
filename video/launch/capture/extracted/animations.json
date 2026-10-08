@@ -1,0 +1,571 @@
+{
+  "summary": {
+    "webAnimations": 11,
+    "cssDeclarations": 33,
+    "scrollTargets": 0,
+    "cdpAnimations": 12,
+    "canvases": 1
+  },
+  "namedAnimations": [
+    "wordIn",
+    "stamp",
+    "slotCall",
+    "tipIn"
+  ],
+  "scrollTriggeredElements": 0,
+  "representativeAnimations": [
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "wordIn",
+      "targetSelector": "em.word-em",
+      "targetRect": {
+        "x": 1007.359375,
+        "y": 86.765625,
+        "width": 151.828125,
+        "height": 53.03125,
+        "top": 86.765625,
+        "right": 1159.1875,
+        "bottom": 139.796875,
+        "left": 1007.359375
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(3px)",
+          "transform": "translateY(10px)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 500,
+        "delay": 0,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "stamp",
+      "targetSelector": "span.rail-letter",
+      "targetRect": {
+        "x": 904.0625,
+        "y": 210.796875,
+        "width": 13.984375,
+        "height": 22,
+        "top": 210.796875,
+        "right": 918.046875,
+        "bottom": 232.796875,
+        "left": 904.0625
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(2px)",
+          "transform": "translateY(-14px) scale(1.5)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.55,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(2px) scale(0.98)",
+          "opacity": "1",
+          "computedOffset": 0.55
+        },
+        {
+          "offset": 0.75,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(-1px) scale(1.01)",
+          "computedOffset": 0.75
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 420,
+        "delay": 0,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "stamp",
+      "targetSelector": "span.rail-letter",
+      "targetRect": {
+        "x": 918.046875,
+        "y": 210.796875,
+        "width": 13.984375,
+        "height": 22,
+        "top": 210.796875,
+        "right": 932.03125,
+        "bottom": 232.796875,
+        "left": 918.046875
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(2px)",
+          "transform": "translateY(-14px) scale(1.5)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.55,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(2px) scale(0.98)",
+          "opacity": "1",
+          "computedOffset": 0.55
+        },
+        {
+          "offset": 0.75,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(-1px) scale(1.01)",
+          "computedOffset": 0.75
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 420,
+        "delay": 11.428571428571429,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "stamp",
+      "targetSelector": "span.rail-letter",
+      "targetRect": {
+        "x": 932.03125,
+        "y": 210.796875,
+        "width": 13.984375,
+        "height": 22,
+        "top": 210.796875,
+        "right": 946.015625,
+        "bottom": 232.796875,
+        "left": 932.03125
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(2px)",
+          "transform": "translateY(-14px) scale(1.5)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.55,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(2px) scale(0.98)",
+          "opacity": "1",
+          "computedOffset": 0.55
+        },
+        {
+          "offset": 0.75,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(-1px) scale(1.01)",
+          "computedOffset": 0.75
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 420,
+        "delay": 22.857142857142858,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "stamp",
+      "targetSelector": "span.rail-letter",
+      "targetRect": {
+        "x": 946.015625,
+        "y": 210.796875,
+        "width": 13.984375,
+        "height": 22,
+        "top": 210.796875,
+        "right": 960,
+        "bottom": 232.796875,
+        "left": 946.015625
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(2px)",
+          "transform": "translateY(-14px) scale(1.5)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.55,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(2px) scale(0.98)",
+          "opacity": "1",
+          "computedOffset": 0.55
+        },
+        {
+          "offset": 0.75,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(-1px) scale(1.01)",
+          "computedOffset": 0.75
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 420,
+        "delay": 34.285714285714285,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "stamp",
+      "targetSelector": "span.rail-letter",
+      "targetRect": {
+        "x": 960,
+        "y": 210.796875,
+        "width": 13.984375,
+        "height": 22,
+        "top": 210.796875,
+        "right": 973.984375,
+        "bottom": 232.796875,
+        "left": 960
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(2px)",
+          "transform": "translateY(-14px) scale(1.5)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.55,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(2px) scale(0.98)",
+          "opacity": "1",
+          "computedOffset": 0.55
+        },
+        {
+          "offset": 0.75,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(-1px) scale(1.01)",
+          "computedOffset": 0.75
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 420,
+        "delay": 45.714285714285715,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "stamp",
+      "targetSelector": "span.rail-letter",
+      "targetRect": {
+        "x": 973.984375,
+        "y": 210.796875,
+        "width": 13.984375,
+        "height": 22,
+        "top": 210.796875,
+        "right": 987.96875,
+        "bottom": 232.796875,
+        "left": 973.984375
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(2px)",
+          "transform": "translateY(-14px) scale(1.5)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.55,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(2px) scale(0.98)",
+          "opacity": "1",
+          "computedOffset": 0.55
+        },
+        {
+          "offset": 0.75,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(-1px) scale(1.01)",
+          "computedOffset": 0.75
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 420,
+        "delay": 57.142857142857146,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "stamp",
+      "targetSelector": "span.rail-letter",
+      "targetRect": {
+        "x": 987.96875,
+        "y": 210.796875,
+        "width": 13.984375,
+        "height": 22,
+        "top": 210.796875,
+        "right": 1001.953125,
+        "bottom": 232.796875,
+        "left": 987.96875
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(2px)",
+          "transform": "translateY(-14px) scale(1.5)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.55,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(2px) scale(0.98)",
+          "opacity": "1",
+          "computedOffset": 0.55
+        },
+        {
+          "offset": 0.75,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(-1px) scale(1.01)",
+          "computedOffset": 0.75
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 420,
+        "delay": 68.57142857142857,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "finished",
+      "animationName": "stamp",
+      "targetSelector": "span.rail-letter",
+      "targetRect": {
+        "x": 1001.953125,
+        "y": 210.796875,
+        "width": 13.984375,
+        "height": 22,
+        "top": 210.796875,
+        "right": 1015.9375,
+        "bottom": 232.796875,
+        "left": 1001.953125
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "blur(2px)",
+          "transform": "translateY(-14px) scale(1.5)",
+          "opacity": "0",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.55,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(2px) scale(0.98)",
+          "opacity": "1",
+          "computedOffset": 0.55
+        },
+        {
+          "offset": 0.75,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "transform": "translateY(-1px) scale(1.01)",
+          "computedOffset": 0.75
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "composite": "auto",
+          "filter": "none",
+          "transform": "none",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 420,
+        "delay": 80,
+        "iterations": 1,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "running",
+      "animationName": "slotCall",
+      "targetSelector": "#word-slot.slot",
+      "targetRect": {
+        "x": 740,
+        "y": 845.796875,
+        "width": 440,
+        "height": 46,
+        "top": 845.796875,
+        "right": 1180,
+        "bottom": 891.796875,
+        "left": 740
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "boxShadow": "rgba(0, 0, 0, 0.6) 0px 2px 6px 0px inset, rgba(255, 220, 160, 0.14) 0px 1px 0px 0px",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.5,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "boxShadow": "rgba(0, 0, 0, 0.6) 0px 2px 6px 0px inset, rgba(228, 87, 60, 0.32) 0px 0px 14px 0px, rgba(255, 220, 160, 0.14) 0px 1px 0px 0px",
+          "computedOffset": 0.5
+        },
+        {
+          "offset": 1,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "boxShadow": "rgba(0, 0, 0, 0.6) 0px 2px 6px 0px inset, rgba(255, 220, 160, 0.14) 0px 1px 0px 0px",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 1800,
+        "delay": 0,
+        "iterations": null,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    }
+  ]
+}

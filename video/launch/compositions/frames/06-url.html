@@ -1,0 +1,134 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+@font-face{font-family:Fraunces Variable;font-style:normal;font-display:swap;font-weight:100 900;src:url("assets/fonts/captured-fraunces-latin-full-normal-CFFu7zhK.woff2")format("woff2-variations")}
+@font-face{font-family:Fraunces Variable;font-style:italic;font-display:swap;font-weight:100 900;src:url("assets/fonts/captured-fraunces-latin-full-italic-D2JnYqd-.woff2")format("woff2-variations")}
+@font-face{font-family:Space Mono;font-style:normal;font-display:swap;font-weight:400;src:url("assets/fonts/captured-space-mono-latin-400-normal-Rg4St2Dn.woff2")format("woff2"), url("assets/fonts/captured-space-mono-latin-400-normal-_3DlpgIW.woff")format("woff")}
+@font-face{font-family:"Fraunces";font-weight:400;font-style:italic;font-display:block;src:url("assets/fonts/Fraunces-Regular-Italic.woff2") format("woff2");}
+@font-face{font-family:"Fraunces";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Fraunces-Regular.woff2") format("woff2");}
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+    }
+    #root .clip {
+      position: absolute;
+      inset: 0;
+    }
+    video.clip { object-fit: cover; }
+    .url6-bg { background: #241b10; }
+    .url6-grain {
+      background:
+        radial-gradient(ellipse 90% 60% at 50% -10%, rgba(193,154,74,0.14) 0%, rgba(193,154,74,0) 60%),
+        radial-gradient(ellipse 120% 120% at 50% 55%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%);
+    }
+    .url6-corner {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-color: #c19a4a;
+      border-style: solid;
+      border-width: 0;
+    }
+    .url6-kicker-text {
+      position: absolute;
+      left: 106px;
+      top: 96px;
+      font-family: "Space Mono", ui-monospace, monospace;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #c19a4a;
+    }
+    .url6-block {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-52%);
+      text-align: center;
+    }
+    .url6-head {
+      margin: 0;
+      font-family: "Fraunces Variable", "Fraunces", Georgia, serif;
+      font-style: italic;
+      font-weight: 540;
+      font-size: 96px;
+      line-height: 1.08;
+      letter-spacing: -0.012em;
+      color: #efe7da;
+    }
+    .url6-url {
+      margin: 54px 0 0;
+      font-family: "Space Mono", ui-monospace, monospace;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #c19a4a;
+    }
+    .url6-url .url6-dot { color: #e4573c; }
+    .url6-foot {
+      margin: 34px 0 0;
+      font-family: "Space Mono", ui-monospace, monospace;
+      font-size: 17px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(239,231,218,0.56);
+    }
+    .url6-rule {
+      width: 56px;
+      height: 3px;
+      background: #e4573c;
+      margin: 0 auto 40px;
+      transform-origin: center;
+    }
+  </style>
+
+  <div id="root" data-composition-id="06-url" data-width="1920" data-height="1080">
+    <div id="url6-bg" class="clip url6-bg" data-start="0" data-duration="4.6" data-track-index="0"></div>
+    <div id="url6-grain" class="clip url6-grain" data-start="0" data-duration="4.6" data-track-index="1"></div>
+    <div id="url6-corners" class="clip" data-start="0" data-duration="4.6" data-track-index="2">
+      <div class="url6-corner" style="left:64px;top:64px;border-left-width:2px;border-top-width:2px"></div>
+      <div class="url6-corner" style="right:64px;top:64px;border-right-width:2px;border-top-width:2px"></div>
+      <div class="url6-corner" style="left:64px;bottom:64px;border-left-width:2px;border-bottom-width:2px"></div>
+      <div class="url6-corner" style="right:64px;bottom:64px;border-right-width:2px;border-bottom-width:2px"></div>
+    </div>
+    <div id="url6-kicker" class="clip" data-start="0" data-duration="4.6" data-track-index="3">
+      <span class="url6-kicker-text">plinks</span>
+    </div>
+    <div id="url6-center" class="clip" data-start="0" data-duration="4.6" data-track-index="4">
+      <div class="url6-block" id="url6-block">
+        <div class="url6-rule" id="url6-rule"></div>
+        <p class="url6-head" id="url6-head">the song of a word</p>
+        <p class="url6-url" id="url6-url">play-plinks<span class="url6-dot">.</span>vercel<span class="url6-dot">.</span>app</p>
+        <p class="url6-foot" id="url6-foot">type a word · drop a marble · open source</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      var block = document.getElementById("url6-block");
+      var rule = document.getElementById("url6-rule");
+      var url = document.getElementById("url6-url");
+      var foot = document.getElementById("url6-foot");
+      var kicker = document.querySelector(".url6-kicker-text");
+      tl.fromTo(block, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, 0.15);
+      tl.fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.inOut" }, 0.7);
+      tl.fromTo(url, { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, 1.0);
+      tl.fromTo(foot, { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, 1.3);
+      tl.fromTo(kicker, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.4);
+
+      tl.to({}, { duration: 4.6 }, 0);
+      window.__timelines["06-url"] = tl;
+      tl.seek(0);
+    })();
+  </script>
+</template>

@@ -1,0 +1,180 @@
+{
+  "typography": [
+    {
+      "role": "display",
+      "fontFamily": "Fraunces",
+      "fontSize": "52px",
+      "fontWeight": "540",
+      "lineHeight": "53.04px",
+      "letterSpacing": "-0.52px",
+      "color": "#241B10",
+      "sampleText": "the song of estrella"
+    },
+    {
+      "role": "body",
+      "fontFamily": "Fraunces",
+      "fontSize": "19px",
+      "fontWeight": "400",
+      "lineHeight": "normal",
+      "letterSpacing": "normal",
+      "color": "#4A3B28",
+      "sampleText": "sounds like salt on a bicycle wheel"
+    },
+    {
+      "role": "link",
+      "fontFamily": "Fraunces",
+      "fontSize": "17px",
+      "fontWeight": "640",
+      "lineHeight": "normal",
+      "letterSpacing": "1.02px",
+      "color": "#241B10",
+      "sampleText": "Plinks"
+    },
+    {
+      "role": "label",
+      "fontFamily": "Space Mono",
+      "fontSize": "9px",
+      "fontWeight": "400",
+      "lineHeight": "normal",
+      "letterSpacing": "2.7px",
+      "color": "#8F6F38",
+      "sampleText": "word"
+    }
+  ],
+  "spacing": {
+    "observed": [
+      1,
+      4,
+      6,
+      10,
+      12
+    ],
+    "baseUnit": 4
+  },
+  "radius": [
+    "50%"
+  ],
+  "shadows": [
+    {
+      "value": "rgba(60, 40, 15, 0.4) 0px 1.5px 0px 0px, rgba(255, 240, 200, 0.6) 0px 1px 0px 0px inset",
+      "count": 1
+    },
+    {
+      "value": "rgba(0, 0, 0, 0.35) 0px 3px 0px 0px, rgba(255, 235, 190, 0.5) 0px 2px 3px 0px inset, rgba(0, 0, 0, 0.35) 0px -3px 5px 0px inset",
+      "count": 1
+    },
+    {
+      "value": "rgba(0, 0, 0, 0.2) 0px 2px 0px 0px, rgba(255, 240, 200, 0.5) 0px 1px 1px 0px inset",
+      "count": 1
+    },
+    {
+      "value": "rgba(0, 0, 0, 0.18) 0px 2px 0px 0px",
+      "count": 1
+    },
+    {
+      "value": "rgba(60, 40, 15, 0.5) 0px 24px 60px -22px, rgba(0, 0, 0, 0.06) 0px 2px 0px 0px",
+      "count": 1
+    }
+  ],
+  "buttons": [
+    {
+      "label": "?",
+      "background": "transparent",
+      "backgroundImage": "radial-gradient(circle at 35% 28%, rgb(236, 200, 120), rgb(193, 154, 74) 60%, rgb(122, 92, 34))",
+      "backdropFilter": "",
+      "color": "#2E2210",
+      "padding": "1px 6px",
+      "borderRadius": "50%",
+      "border": "1px solid rgb(110, 83, 32)",
+      "boxShadow": "rgba(60, 40, 15, 0.4) 0px 1.5px 0px 0px, rgba(255, 240, 200, 0.6) 0px 1px 0px 0px inset",
+      "fontSize": "10.5px",
+      "fontWeight": "700",
+      "height": "21px"
+    },
+    {
+      "label": "drop",
+      "background": "transparent",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#000000",
+      "padding": "0px",
+      "borderRadius": "0px",
+      "border": "0px none rgb(0, 0, 0)",
+      "boxShadow": "none",
+      "fontSize": "13.3333px",
+      "fontWeight": "400",
+      "height": "52px"
+    },
+    {
+      "label": "t1",
+      "background": "transparent",
+      "backgroundImage": "repeating-conic-gradient(rgb(217, 176, 96) 0deg, rgb(217, 176, 96) 10deg, rgb(168, 127, 54) 10deg, rgb(168, 127, 54) 20deg)",
+      "backdropFilter": "",
+      "color": "#000000",
+      "padding": "0px",
+      "borderRadius": "50%",
+      "border": "1px solid rgb(110, 83, 32)",
+      "boxShadow": "rgba(0, 0, 0, 0.35) 0px 3px 0px 0px, rgba(255, 235, 190, 0.5) 0px 2px 3px 0px inset, rgba(0, 0, 0, 0.35) 0px -3px 5px 0px inset",
+      "fontSize": "13.3333px",
+      "fontWeight": "400",
+      "height": "46px"
+    },
+    {
+      "label": "button",
+      "background": "transparent",
+      "backgroundImage": "radial-gradient(circle at 35% 30%, rgb(224, 188, 110), rgb(193, 154, 74) 55%, rgb(138, 102, 36))",
+      "backdropFilter": "",
+      "color": "#000000",
+      "padding": "1px 6px",
+      "borderRadius": "50%",
+      "border": "1px solid rgb(122, 92, 34)",
+      "boxShadow": "rgba(0, 0, 0, 0.2) 0px 2px 0px 0px, rgba(255, 240, 200, 0.5) 0px 1px 1px 0px inset",
+      "fontSize": "13.3333px",
+      "fontWeight": "400",
+      "height": "42px"
+    },
+    {
+      "label": "skip",
+      "background": "transparent",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#6B5C4A",
+      "padding": "4px 0px",
+      "borderRadius": "0px",
+      "border": "0px none rgb(107, 92, 74)",
+      "boxShadow": "none",
+      "fontSize": "10.5px",
+      "fontWeight": "400",
+      "height": "24px"
+    }
+  ],
+  "cards": [],
+  "nav": {
+    "label": "navigation",
+    "background": "transparent",
+    "backgroundImage": "",
+    "backdropFilter": "",
+    "color": "#241B10",
+    "padding": "18px 4px 10px",
+    "borderRadius": "0px",
+    "border": "0px none rgb(36, 27, 16)",
+    "boxShadow": "none",
+    "fontSize": "11px",
+    "fontWeight": "400",
+    "height": "50.7656px"
+  },
+  "chips": [],
+  "statCells": [],
+  "tabs": [],
+  "backgrounds": [
+    {
+      "value": "radial-gradient(rgba(120, 95, 55, 0.05) 1px, rgba(0, 0, 0, 0) 1px)",
+      "area": 2126970
+    },
+    {
+      "value": "linear-gradient(rgb(212, 172, 94) 0%, rgb(193, 154, 74) 45%, rgb(150, 112, 42) 100%)",
+      "area": 22090
+    }
+  ],
+  "glass": []
+}

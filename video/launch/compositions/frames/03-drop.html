@@ -1,0 +1,143 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+@font-face{font-family:Fraunces Variable;font-style:normal;font-display:swap;font-weight:100 900;src:url("assets/fonts/captured-fraunces-latin-full-normal-CFFu7zhK.woff2")format("woff2-variations")}
+@font-face{font-family:Fraunces Variable;font-style:italic;font-display:swap;font-weight:100 900;src:url("assets/fonts/captured-fraunces-latin-full-italic-D2JnYqd-.woff2")format("woff2-variations")}
+@font-face{font-family:Space Mono;font-style:normal;font-display:swap;font-weight:400;src:url("assets/fonts/captured-space-mono-latin-400-normal-Rg4St2Dn.woff2")format("woff2"), url("assets/fonts/captured-space-mono-latin-400-normal-_3DlpgIW.woff")format("woff")}
+@font-face{font-family:"Fraunces";font-weight:400;font-style:italic;font-display:block;src:url("assets/fonts/Fraunces-Regular-Italic.woff2") format("woff2");}
+@font-face{font-family:"Fraunces";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Fraunces-Regular.woff2") format("woff2");}
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+    }
+    #root .clip {
+      position: absolute;
+      inset: 0;
+    }
+    video.clip { object-fit: cover; }
+    /* light veil under the type — footage is pale bone, so the scrim is pale */
+    #root [id="03-drop-scrim"] {
+      background:
+        linear-gradient(to top, rgba(239,231,218,0.82) 0%, rgba(239,231,218,0.38) 26%, rgba(239,231,218,0) 48%),
+        linear-gradient(to right, rgba(239,231,218,0.5) 0%, rgba(239,231,218,0) 44%);
+    }
+    #root [id="03-drop-kicker-text"] {
+      position: absolute;
+      left: 106px;
+      top: 96px;
+      font-family: "Space Mono", ui-monospace, monospace;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #241b10;
+    }
+    #root [id="03-drop-kicker-text"]::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: #e4573c;
+      margin-right: 18px;
+      vertical-align: 1px;
+    }
+    #root [id="03-drop-label-inner"] {
+      position: absolute;
+      left: 106px;
+      bottom: 120px;
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+    }
+    #root [id="03-drop-tick"] {
+      width: 34px;
+      height: 3px;
+      background: #e4573c;
+      transform-origin: left center;
+    }
+    #root [id="03-drop-label-text"] {
+      margin: 0;
+      font-family: "Space Mono", ui-monospace, monospace;
+      font-size: 26px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      color: #241b10;
+    }
+    #root [id="03-drop-head-inner"] {
+      position: absolute;
+      left: 106px;
+      bottom: 168px;
+    }
+    #root [id="03-drop-rule"] {
+      width: 36px;
+      height: 3px;
+      background: #e4573c;
+      margin-bottom: 26px;
+      transform-origin: left center;
+    }
+    #root [id="03-drop-head-text"] {
+      margin: 0;
+      font-family: "Fraunces Variable", "Fraunces", Georgia, serif;
+      font-style: italic;
+      font-weight: 540;
+      font-size: 74px;
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      color: #241b10;
+      max-width: 640px;
+    }
+  </style>
+
+  <div id="root" data-composition-id="03-drop" data-width="1920" data-height="1080">
+    <div id="03-drop-bg" class="clip" data-start="0" data-duration="6.2" data-track-index="0" style="background:#efe7da"></div>
+    <video
+      id="03-drop-footage"
+      class="clip"
+      data-frame-video="approved"
+      data-frame-video-x="0"
+      data-frame-video-y="0"
+      data-frame-video-width="1920"
+      data-frame-video-height="1080"
+      data-frame-video-fit="cover"
+      src="assets/session-1080.mp4"
+      data-media-start="15.4"
+      data-start="0"
+      data-duration="6.2"
+      data-track-index="1"
+      muted
+      playsinline
+      preload="auto"
+    ></video>
+    <div id="03-drop-scrim" class="clip" data-start="0" data-duration="6.2" data-track-index="2"></div>
+    <div id="03-drop-label" class="clip" data-start="0" data-duration="6.2" data-track-index="3">
+      <div id="03-drop-label-inner">
+        <div id="03-drop-tick"></div>
+        <p id="03-drop-label-text">press — physics writes the melody</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      var scrim = document.getElementById("03-drop-scrim");
+      var inner = document.getElementById("03-drop-label-inner");
+      var tick = document.getElementById("03-drop-tick");
+      var text = document.getElementById("03-drop-label-text");
+      tl.fromTo(scrim, { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0);
+      tl.fromTo(tick, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.inOut" }, 0.3);
+      tl.fromTo(text, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.44999999999999996);
+      tl.to(inner, { opacity: 0, duration: 0.45, ease: "power2.in" }, 5.6000000000000005);
+
+      tl.to({}, { duration: 6.2 }, 0);
+      window.__timelines["03-drop"] = tl;
+      tl.seek(0);
+    })();
+  </script>
+</template>

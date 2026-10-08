@@ -1,0 +1,218 @@
+{
+  "files": [
+    {
+      "file": "fraunces-latin-ext-full-italic-B8-t4Nou.woff2",
+      "family": "Fraunces",
+      "rawFamily": "Fraunces",
+      "subfamily": "Italic",
+      "postscript": "Fraunces-9ptBlackItalic",
+      "weight": 900,
+      "style": "italic",
+      "variationAxes": [
+        "opsz",
+        "wght",
+        "SOFT",
+        "WONK"
+      ],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "fraunces-latin-ext-full-normal-YHFkNujK.woff2",
+      "family": "Fraunces",
+      "rawFamily": "Fraunces",
+      "subfamily": "Regular",
+      "postscript": "Fraunces-9ptBlack",
+      "weight": 900,
+      "style": "normal",
+      "variationAxes": [
+        "opsz",
+        "wght",
+        "SOFT",
+        "WONK"
+      ],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "fraunces-latin-full-italic-D2JnYqd-.woff2",
+      "family": "Fraunces",
+      "rawFamily": "Fraunces",
+      "subfamily": "Italic",
+      "postscript": "Fraunces-9ptBlackItalic",
+      "weight": 900,
+      "style": "italic",
+      "variationAxes": [
+        "opsz",
+        "wght",
+        "SOFT",
+        "WONK"
+      ],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "fraunces-latin-full-normal-CFFu7zhK.woff2",
+      "family": "Fraunces",
+      "rawFamily": "Fraunces",
+      "subfamily": "Regular",
+      "postscript": "Fraunces-9ptBlack",
+      "weight": 900,
+      "style": "normal",
+      "variationAxes": [
+        "opsz",
+        "wght",
+        "SOFT",
+        "WONK"
+      ],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "fraunces-vietnamese-full-italic-BHALq22K.woff2",
+      "family": "Fraunces",
+      "rawFamily": "Fraunces",
+      "subfamily": "Italic",
+      "postscript": "Fraunces-9ptBlackItalic",
+      "weight": 900,
+      "style": "italic",
+      "variationAxes": [
+        "opsz",
+        "wght",
+        "SOFT",
+        "WONK"
+      ],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "fraunces-vietnamese-full-normal-7BpKI3vF.woff2",
+      "family": "Fraunces",
+      "rawFamily": "Fraunces",
+      "subfamily": "Regular",
+      "postscript": "Fraunces-9ptBlack",
+      "weight": 900,
+      "style": "normal",
+      "variationAxes": [
+        "opsz",
+        "wght",
+        "SOFT",
+        "WONK"
+      ],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "space-mono-latin-400-normal-Rg4St2Dn.woff2",
+      "family": "Space Mono",
+      "rawFamily": "Space Mono",
+      "subfamily": "Regular",
+      "postscript": "SpaceMono-Regular",
+      "weight": 400,
+      "style": "normal",
+      "variationAxes": [],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "space-mono-latin-400-normal-_3DlpgIW.woff",
+      "family": "Space Mono",
+      "rawFamily": "Space Mono",
+      "subfamily": "Regular",
+      "postscript": "SpaceMono-Regular",
+      "weight": 400,
+      "style": "normal",
+      "variationAxes": [],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "space-mono-latin-ext-400-normal-D4cJI_B-.woff",
+      "family": "Space Mono",
+      "rawFamily": "Space Mono",
+      "subfamily": "Regular",
+      "postscript": "SpaceMono-Regular",
+      "weight": 400,
+      "style": "normal",
+      "variationAxes": [],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "space-mono-latin-ext-400-normal-DTLbW2xa.woff2",
+      "family": "Space Mono",
+      "rawFamily": "Space Mono",
+      "subfamily": "Regular",
+      "postscript": "SpaceMono-Regular",
+      "weight": 400,
+      "style": "normal",
+      "variationAxes": [],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "space-mono-latin-ext-700-normal-B2s3bDs2.woff2",
+      "family": "Space Mono",
+      "rawFamily": "Space Mono",
+      "subfamily": "Bold",
+      "postscript": "SpaceMono-Bold",
+      "weight": 700,
+      "style": "normal",
+      "variationAxes": [],
+      "identified": true,
+      "isIcon": false
+    },
+    {
+      "file": "space-mono-latin-ext-700-normal-B_E7P90g.woff",
+      "family": "Space Mono",
+      "rawFamily": "Space Mono",
+      "subfamily": "Bold",
+      "postscript": "SpaceMono-Bold",
+      "weight": 700,
+      "style": "normal",
+      "variationAxes": [],
+      "identified": true,
+      "isIcon": false
+    }
+  ],
+  "families": [
+    {
+      "family": "Fraunces",
+      "weights": [
+        900
+      ],
+      "variable": true,
+      "fileCount": 6,
+      "files": [
+        "fraunces-latin-ext-full-italic-B8-t4Nou.woff2",
+        "fraunces-latin-ext-full-normal-YHFkNujK.woff2",
+        "fraunces-latin-full-italic-D2JnYqd-.woff2",
+        "fraunces-latin-full-normal-CFFu7zhK.woff2",
+        "fraunces-vietnamese-full-italic-BHALq22K.woff2",
+        "fraunces-vietnamese-full-normal-7BpKI3vF.woff2"
+      ]
+    },
+    {
+      "family": "Space Mono",
+      "weights": [
+        400,
+        700
+      ],
+      "variable": false,
+      "fileCount": 6,
+      "files": [
+        "space-mono-latin-400-normal-Rg4St2Dn.woff2",
+        "space-mono-latin-400-normal-_3DlpgIW.woff",
+        "space-mono-latin-ext-400-normal-D4cJI_B-.woff",
+        "space-mono-latin-ext-400-normal-DTLbW2xa.woff2",
+        "space-mono-latin-ext-700-normal-B2s3bDs2.woff2",
+        "space-mono-latin-ext-700-normal-B_E7P90g.woff"
+      ]
+    }
+  ],
+  "unidentified": [],
+  "meta": {
+    "generatedAt": "2026-10-08T12:46:46.030Z",
+    "tool": "fontkit"
+  }
+}

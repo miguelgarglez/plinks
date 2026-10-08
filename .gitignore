@@ -25,3 +25,6 @@ dist-ssr
 .vercel
 .env*
 .vitest/
+
+# video working artifacts
+video/raw/

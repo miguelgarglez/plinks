@@ -1,0 +1,18 @@
+[a] Plinks
+[span] generative bean machine
+[span] no.
+[span] 2649
+[h1] the song of
+[em] estrella
+[p] sounds like salt on a bicycle wheel
+[span] the score appears as the marble plays
+[label] word
+[span] drop
+[span] take
+[span] share
+[span] sound
+[div] kalimba · major pentatonic · 121 bpm
+[span] no network · no account · just physics
+[span] step
+[p] Type any word — the machine eats the letters.
+[button] skip

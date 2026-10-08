@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/launch-poster.png" alt="Plinks — the song of marble, a walnut bean machine with brass pegs" width="720" />
+  <img src="docs/launch-poster.png" alt="Plinks — the song of cassiopeia: a walnut bean machine with brass pegs, a scrubbable score rail and a machined control deck" width="720" />
 </p>
 
 # Plinks
@@ -10,19 +10,27 @@
 
 ## What it does
 
-Every word is a different song. Type one, and a marble drops through a walnut
-pegboard — a Galton bean machine — playing a plucked note each time it strikes a
-peg. The struck pegs keep a pitch-colored ember, so the board remembers the
-melody it just played. Landing in a basin resolves the song on a deep tonic.
+Every word is a different song. Type one, and your letters rain through the
+pegboard as beads before a marble drops through them — a Galton bean machine
+playing a plucked note each time it strikes a peg. The struck pegs keep a
+pitch-colored ember, so the board remembers the melody it just played. Landing
+in a basin resolves the song on a deep tonic.
 
 The same word always produces the same song: the board, scale, instrument, tempo
 and marble path are all derived deterministically from the word itself. `?take=N`
 varies the drop without changing the song's identity.
 
-- Type any word (or visit `/<word>` directly — the URL is the song)
-- Another take re-drops the same seed with a different roll
-- Tap any note on the score rail to hear it again — it flashes its peg on the board
-- Share renders a 1200×630 card of the melody in the product's own language
+- Type any word (or visit `/<word>` directly — the URL is the song) — each letter
+  falls in as a bead you can hear land
+- Strum the pegs with your cursor — the board answers even when it's idle
+- Press the ember plunger; the drop plays out with peg wobble, pitch-colored
+  sparks, dust and a small camera kick
+- The settled score is playable — drag the rail to scrub the melody, tap a note
+  to re-hear it, or hit replay
+- Pull the share ticket: a punched card rises with the word, its line, the note
+  strip and the URL — copy the link or save the 1200×630 card
+- A machined walnut-and-brass deck holds the word slot, plunger, take dial,
+  ticket and a mute knob — a first-run guide teaches it by doing (`?` replays it)
 - No network calls, no accounts, no AI — physics and synthesis only
 
 ## How it works
@@ -43,6 +51,11 @@ Interesting detail: the audio is scheduled at the physical collision time, not a
 quantized grid — so what you see is literally what you hear. The same seed
 replays the identical performance, which is what makes a shared URL reproduce
 the song exactly.
+
+The board itself is alive between drops: typed letters spawn as weighted beads
+in a small live physics layer, idle pegs answer the cursor with soft plucks, and
+the recorded performance stays mapped to the score rail — scrubbing it replays
+each note at its true physical timestamp.
 
 ## Run locally
 
