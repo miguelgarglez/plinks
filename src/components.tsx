@@ -6,6 +6,7 @@ import { audioEngine } from './playback';
 import { midiName } from './lib/music';
 import { gestureDown, gestureFinish, gestureLost, gestureMove } from './lib/scrub';
 import type { Gesture, RailBox, ScrubHit } from './lib/scrub';
+import { haptic } from './lib/haptics';
 import { ramp } from './board';
 
 // ── brass rail: the word stamps in, letter by letter ──
@@ -58,6 +59,7 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
     if ((rungAt.current.get(i) ?? -9e3) >= now - 220) return false;
     rungAt.current.set(i, now);
     audioEngine.setKit(song.kit);
+    haptic('note');
     pb.ping(evs[i].pegId, evs[i].midi, 0.8);
     return true;
   };
@@ -144,6 +146,7 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
     if (!done.replay) return;
     blockReplayClick.current = true;
     audioEngine.unlock();
+    haptic('replay');
     pb.replay();
   };
   const scrubCancel = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -266,6 +269,7 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
                 return;
               }
               audioEngine.unlock();
+              haptic('replay');
               pb.replay();
             }}
             aria-label="Replay the whole melody"
