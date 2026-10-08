@@ -176,7 +176,7 @@ export function ShareCard({ song, drop, take, onClose }: {
           </button>
           <span className="sc-stud-wrap">
             <button type="button" className="sc-stud" onClick={copy} aria-label="Copy the song link">
-              <svg className="sc-stud-icon" viewBox="-2 -2 20 20" width="16" height="16" aria-hidden="true">
+              <svg className="sc-stud-icon" viewBox="-4 -4 24 24" width="16" height="16" aria-hidden="true">
                 <path d="M6.5 9.5l3-3M5 11.5l-1.8 1.8a2.3 2.3 0 1 1-3.2-3.2L3.5 6.5a2.3 2.3 0 0 1 3.2 0M11 4.5l1.8-1.8a2.3 2.3 0 1 1 3.2 3.2L12.5 9.5a2.3 2.3 0 0 1-3.2 0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
             </button>

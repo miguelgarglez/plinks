@@ -22,7 +22,7 @@ describe('share LINK icon viewBox', () => {
   const d =
     'M6.5 9.5l3-3M5 11.5l-1.8 1.8a2.3 2.3 0 1 1-3.2-3.2L3.5 6.5a2.3 2.3 0 0 1 3.2 0M11 4.5l1.8-1.8a2.3 2.3 0 1 1 3.2 3.2L12.5 9.5a2.3 2.3 0 0 1-3.2 0';
   // padded viewBox used in sharecard.tsx
-  const vb = { x: -2, y: -2, w: 20, h: 20 };
+  const vb = { x: -4, y: -4, w: 24, h: 24 };
 
   it('keeps the chain stroke inside the padded viewBox', () => {
     const b = pathRoughBounds(d);
