@@ -363,10 +363,10 @@ body {
 
 .deck-label {
   display: block;
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: #a8843f;
+  color: #bb9550;
   text-shadow: 0 1px 0 rgba(255, 220, 160, 0.18);
   text-align: center;
   margin-bottom: 5px;
@@ -463,8 +463,8 @@ body {
 /* knob captions are subordinate — tighter tracking so they fit the panel */
 .deck-cluster .deck-label, .mute-wrap .deck-label {
   margin-bottom: 0; margin-top: 4px;
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  font-size: 9.5px;
+  letter-spacing: 0.15em;
   white-space: nowrap;
 }
 .dial {
@@ -1136,7 +1136,7 @@ body {
   .score-hint { font-size: 12px; letter-spacing: 0.1em; }
   .slot { padding-top: 9px; padding-bottom: 9px; }
   .plunger-cap { min-height: 50px; }
-  .deck-foot .deck-spec { font-size: 8.5px; letter-spacing: 0.14em; }
+  .deck-foot .deck-spec { font-size: 9px; letter-spacing: 0.12em; }
   .share-plate { padding: 26px 18px 18px; }
   .share-perf { margin: -26px -18px 0; }
   .guide-tip p { font-size: 12px; }
