@@ -3,6 +3,13 @@ import type { NoteEventLike } from './types';
 
 // Karplus-Strong plucked-string synthesis, rendered into AudioBuffers once per
 // pitch. Plus a generated exponential-decay noise impulse for reverb.
+type AudioContextCtor = typeof AudioContext;
+
+function audioContextCtor(): AudioContextCtor {
+  const w = globalThis as typeof globalThis & { webkitAudioContext?: AudioContextCtor };
+  return w.AudioContext ?? w.webkitAudioContext ?? AudioContext;
+}
+
 export class AudioEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
@@ -11,6 +18,7 @@ export class AudioEngine {
   private live = new Set<AudioBufferSourceNode>();
   private kit: KitName = 'kalimba';
   private _muted = false;
+  private listening = false;
 
   get muted() { return this._muted; }
 
@@ -25,18 +33,41 @@ export class AudioEngine {
 
   get ready() { return !!this.ctx; }
 
+  get state(): AudioContextState | 'missing' {
+    return this.ctx?.state ?? 'missing';
+  }
+
   unlock() {
-    if (this.ctx) { if (this.ctx.state === 'suspended') void this.ctx.resume(); return; }
-    const ctx = new AudioContext();
-    this.ctx = ctx;
-    this.master = ctx.createGain();
-    this.master.gain.value = this._muted ? 0 : 0.9;
-    this.master.connect(ctx.destination);
-    this.wet = ctx.createConvolver();
-    this.wet.buffer = this.impulse(1.8, 2.6);
-    const wetGain = ctx.createGain();
-    wetGain.gain.value = 0.32;
-    this.wet.connect(wetGain).connect(this.master);
+    if (!this.ctx) {
+      const ctx = new (audioContextCtor())();
+      this.ctx = ctx;
+      this.master = ctx.createGain();
+      this.master.gain.value = this._muted ? 0 : 0.9;
+      this.master.connect(ctx.destination);
+      this.wet = ctx.createConvolver();
+      this.wet.buffer = this.impulse(1.8, 2.6);
+      const wetGain = ctx.createGain();
+      wetGain.gain.value = 0.32;
+      this.wet.connect(wetGain).connect(this.master);
+      this.watchVisibility();
+    }
+    this.resume();
+  }
+
+  private resume() {
+    const ctx = this.ctx;
+    if (!ctx || ctx.state !== 'suspended') return;
+    void ctx.resume().catch(() => {
+      // Safari rejects when the user-activation window already closed.
+    });
+  }
+
+  private watchVisibility() {
+    if (this.listening || typeof document === 'undefined') return;
+    this.listening = true;
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') this.resume();
+    });
   }
 
   private impulse(dur: number, decay: number): AudioBuffer {
