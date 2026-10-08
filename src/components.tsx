@@ -44,13 +44,13 @@ export function ScoreRail({ song, drop, pb }: { song: Song; drop: DropResult; pb
     const fx = ((e.clientX - rect.left) / rect.width) * 100;
     let best = -1, bd = Infinity;
     evs.forEach((ev, i) => {
+      if (!(pb.phase === 'settled' || ev.t <= revealed + 0.001)) return;
       const ex = 2 + (ev.t / Math.max(lastT, 0.001)) * 96;
       const d = Math.abs(ex - fx);
       if (d < bd) { bd = d; best = i; }
     });
     if (best < 0) return;
     const ev = evs[best];
-    if (!(pb.phase === 'settled' || ev.t <= revealed + 0.001)) return;
     audioEngine.unlock();
     audioEngine.setKit(song.kit);
     pb.ping(ev.pegId, ev.midi, 0.8);

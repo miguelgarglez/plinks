@@ -108,8 +108,8 @@ export function usePlayback(song: Song, take: number): Playback {
         if (s.trail.length > 36) s.trail.shift();
       }
 
-      // flashes land on the *audible* (quantized) note so sound and light agree
-      while (ei < drop.events.length && drop.events[ei].t + LEAD <= ts) {
+      // flashes land on the audible strike — one clock for marble, light, sound
+      while (ei < drop.events.length && drop.events[ei].t <= ts) {
         const e = drop.events[ei++];
         if (e.pegId >= 0) {
           s.flashes.set(e.pegId, now);
@@ -118,8 +118,8 @@ export function usePlayback(song: Song, take: number): Playback {
           if (navigator.vibrate) navigator.vibrate(3);
         }
       }
-      const lastGrid = drop.events.length ? drop.events[drop.events.length - 1].t + LEAD : 1;
-      s.progress = Math.min(1, ts / Math.max(0.001, lastGrid));
+      const lastT = drop.events.length ? drop.events[drop.events.length - 1].t : 1;
+      s.progress = Math.min(1, Math.max(0, ts) / Math.max(0.001, lastT));
       const land = drop.events[drop.events.length - 1];
       if (land && land.t <= ts && s.basinFlash === null) {
         s.basinFlash = now;
