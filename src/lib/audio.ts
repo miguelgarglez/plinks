@@ -116,6 +116,45 @@ export class AudioEngine {
     this.live.clear();
   }
 
+  // tiny detent click — dial notches, guide ticks
+  tick(freq = 1400, gain = 0.05) {
+    if (!this.ctx || !this.master) return;
+    const ctx = this.ctx;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator();
+    o.type = 'square';
+    o.frequency.setValueAtTime(freq, t);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(gain, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+    o.connect(g).connect(this.master);
+    o.start(t); o.stop(t + 0.035);
+  }
+
+  // paper tear for the share ticket — a band-passed noise rip
+  tear() {
+    if (!this.ctx || !this.master) return;
+    const ctx = this.ctx;
+    const t = ctx.currentTime;
+    const len = Math.floor(ctx.sampleRate * 0.14);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.6);
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(2600, t);
+    bp.frequency.exponentialRampToValueAtTime(700, t + 0.14);
+    bp.Q.value = 0.9;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.4, t);
+    src.connect(bp).connect(g).connect(this.master);
+    src.start(t);
+  }
+
   // wooden knock for basin landing + UI thunks
   knock(when = 0, freq = 220, gain = 0.4) {
     if (!this.ctx || !this.master) return;

@@ -28,8 +28,13 @@ export function Rail({ word }: { word: string }) {
   );
 }
 
-// ── the score: dots on a rhythm rail, revealed as they ring ──
-export function ScoreRail({ song, drop, pb }: { song: Song; drop: DropResult; pb: Playback }) {
+// ── the score: dots on a rhythm rail you can tap, scrub, or replay ──
+export function ScoreRail({ song, drop, pb, onScrub }: {
+  song: Song;
+  drop: DropResult;
+  pb: Playback;
+  onScrub: () => void;
+}) {
   const evs = drop.events;
   const lastT = evs.length ? evs[evs.length - 1].t : 1;
   // colors share the board's full pitch range so a dot matches its peg
@@ -37,23 +42,44 @@ export function ScoreRail({ song, drop, pb }: { song: Song; drop: DropResult; pb
   const lo = Math.min(...midis), hi = Math.max(...midis);
   const revealed = pb.phase === 'settled' ? Infinity : pb.progress * lastT;
 
-  // taps anywhere on the strip replay the nearest note — forgiving on touch
-  const tapStrip = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget && (e.target as HTMLElement).closest('button')) return;
+  const scrubbing = useRef(false);
+  const [scrubX, setScrubX] = useState<number | null>(null);
+  const rungAt = useRef(new Map<number, number>());
+
+  // drag across the rail: every note under the thumb rings as you pass it
+  const scrubTo = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const fx = ((e.clientX - rect.left) / rect.width) * 100;
-    let best = -1, bd = Infinity;
+    const fx = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+    const now = performance.now();
+    let hit = false;
     evs.forEach((ev, i) => {
       if (!(pb.phase === 'settled' || ev.t <= revealed + 0.001)) return;
       const ex = 2 + (ev.t / Math.max(lastT, 0.001)) * 96;
-      const d = Math.abs(ex - fx);
-      if (d < bd) { bd = d; best = i; }
+      if (Math.abs(ex - fx) < 2.4 && (rungAt.current.get(i) ?? -9e3) < now - 220) {
+        rungAt.current.set(i, now);
+        audioEngine.setKit(song.kit);
+        pb.ping(ev.pegId, ev.midi, 0.8);
+        hit = true;
+      }
     });
-    if (best < 0) return;
-    const ev = evs[best];
+    if (hit) onScrub();
+    setScrubX(fx);
+  };
+
+  const scrubDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('button')) return;
     audioEngine.unlock();
-    audioEngine.setKit(song.kit);
-    pb.ping(ev.pegId, ev.midi, 0.8);
+    scrubbing.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    scrubTo(e);
+  };
+  const scrubMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!scrubbing.current) return;
+    scrubTo(e);
+  };
+  const scrubEnd = () => {
+    scrubbing.current = false;
+    setScrubX(null);
   };
 
   const strip = useRef<HTMLDivElement>(null);
@@ -69,17 +95,28 @@ export function ScoreRail({ song, drop, pb }: { song: Song; drop: DropResult; pb
     return () => { el.removeEventListener('scroll', check); ro.disconnect(); };
   }, [evs.length]);
 
+  const playing = pb.phase === 'dropping' || pb.phase === 'replaying';
+
   return (
     <div className={`score${canScroll ? ' can-scroll' : ''}`} ref={strip} aria-label="The melody as a rail of notes">
-      <div className="score-inner" onClick={tapStrip}>
+      <div
+        className="score-inner"
+        onPointerDown={scrubDown}
+        onPointerMove={scrubMove}
+        onPointerUp={scrubEnd}
+        onPointerCancel={scrubEnd}
+      >
       <div className="score-rule" />
-      {pb.phase === 'dropping' && (
+      {playing && (
         <div className="score-playhead" style={{ left: `${2 + pb.progress * 96}%` }} />
+      )}
+      {scrubX !== null && !playing && (
+        <div className="score-scrubhead" style={{ left: `${scrubX}%` }} />
       )}
       {evs.map((e, i) => {
         const x = 2 + (e.t / Math.max(lastT, 0.001)) * 96;
         const u = hi > lo ? (e.midi - lo) / (hi - lo) : 0.5;
-        const y = 12 + (1 - u) * 64;
+        const y = 8 + (1 - u) * 34; // keep dots (22px, centered) above the caption row
         const on = e.t <= revealed + 0.001;
         return (
           <button
@@ -97,11 +134,21 @@ export function ScoreRail({ song, drop, pb }: { song: Song; drop: DropResult; pb
         );
       })}
       {pb.phase === 'idle' && evs.length > 0 && (
-        <div className="score-hint">the score appears as the marble plays</div>
+        <div className="score-hint"><span>the score appears as the marble plays</span></div>
       )}
       </div>
       {pb.phase === 'settled' && (
-        <div className="score-caption">tap a note to hear it again</div>
+        <div className="score-caption">
+          <span>drag to play it</span>
+          <button
+            type="button"
+            className="replay-key"
+            onClick={() => { audioEngine.unlock(); pb.replay(); }}
+            aria-label="Replay the whole melody"
+          >
+            ⟲ replay
+          </button>
+        </div>
       )}
     </div>
   );

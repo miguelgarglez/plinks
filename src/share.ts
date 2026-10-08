@@ -80,36 +80,4 @@ export async function shareCardPng(song: Song, drop: DropResult, take: number): 
   return blob;
 }
 
-export async function shareSong(
-  song: Song,
-  drop: DropResult,
-  take: number,
-): Promise<'shared' | 'copied' | 'downloaded' | 'cancelled'> {
-  const url = `${location.origin}/${song.word}${take > 1 ? `?take=${take}` : ''}`;
-  try {
-    const blob = await shareCardPng(song, drop, take);
-    const file = new File([blob], `the-song-of-${song.word}.png`, { type: 'image/png' });
-    if (navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: `the song of ${song.word}`, url });
-        return 'shared';
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') return 'cancelled';
-        // other share failures fall through to clipboard
-      }
-    }
-  } catch { /* card render failed; still offer the link */ }
-  try {
-    await navigator.clipboard.writeText(url);
-    return 'copied';
-  } catch {
-    const blob = await shareCardPng(song, drop, take);
-    const href = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = href;
-    a.download = `the-song-of-${song.word}.png`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(href), 4000);
-    return 'downloaded';
-  }
-}
+
