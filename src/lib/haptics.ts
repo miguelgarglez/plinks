@@ -21,9 +21,9 @@ function hasVibrate(): boolean {
 }
 
 /**
- * iOS has no Vibration API. A checkbox with the `switch` attribute still trips
- * the Taptic Engine when toggled. Keep it offscreen (not display:none) so WebKit
- * treats the programmatic click as real.
+ * Best-effort iOS path. WebKit has no navigator.vibrate; a checkbox with the
+ * `switch` attribute sometimes trips Taptic when toggled. Keep it offscreen
+ * (not display:none). Often still a no-op — see README "Haptics".
  */
 function iosTap(): void {
   if (typeof document === 'undefined') return;
