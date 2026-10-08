@@ -197,32 +197,35 @@ export default function App() {
         </span>
       </header>
 
-      <main className="hero">
-        <h1 className="title">the song of <em key={song.word} className="word-em">{song.word}</em></h1>
-        <p className="epithet">{song.epithet}</p>
-      </main>
-
-      <section className="instrument" aria-label="The bean machine">
-        <Rail word={song.word} />
-        <div className="board-wrap">
-          <Board song={song} pb={pb} onDrop={drop} beadQueue={beadQueue} />
+      <main className="stage">
+        <div className="hero">
+          <h1 className="title">the song of <em key={song.word} className="word-em">{song.word}</em></h1>
+          <p className="epithet">{song.epithet}</p>
+          <p className="meta">deterministic physics · same word, same song, forever</p>
         </div>
-        <ScoreRail song={song} drop={pb.drop} pb={pb} onScrub={() => setScrubbed(true)} />
-        <Deck
-          input={input}
-          setInput={onType}
-          onSubmit={onSubmit}
-          phase={pb.phase}
-          word={song.word}
-          take={take}
-          onTake={anotherTake}
-          onShare={openShare}
-          muted={muted}
-          onMute={toggleMute}
-          spec={`${KITS[song.kit].name} · ${SCALES[song.scale].name} · ${song.bpm} bpm${take > 1 ? ` · take ${take}` : ''}`}
-          fresh={pb.phase === 'idle' && !input.trim()}
-        />
-      </section>
+
+        <section className="machine" aria-label="The bean machine">
+          <Rail word={song.word} />
+          <div className="board-wrap">
+            <Board song={song} pb={pb} onDrop={drop} beadQueue={beadQueue} />
+          </div>
+          <ScoreRail song={song} drop={pb.drop} pb={pb} onScrub={() => setScrubbed(true)} />
+          <Deck
+            input={input}
+            setInput={onType}
+            onSubmit={onSubmit}
+            phase={pb.phase}
+            word={song.word}
+            take={take}
+            onTake={anotherTake}
+            onShare={openShare}
+            muted={muted}
+            onMute={toggleMute}
+            spec={`${KITS[song.kit].name} · ${SCALES[song.scale].name} · ${song.bpm} bpm${take > 1 ? ` · take ${take}` : ''}`}
+            fresh={pb.phase === 'idle' && !input.trim()}
+          />
+        </section>
+      </main>
 
       <p className="sr-only" role="status">
         {pb.landedAt !== null && pb.phase === 'settled'

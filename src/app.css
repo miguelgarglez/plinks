@@ -93,8 +93,84 @@ body {
   text-transform: lowercase;
 }
 
-/* instrument */
-.instrument { margin-top: clamp(14px, 2.6vh, 26px); width: min(470px, 94vw, max(280px, 100vh - 560px)); }
+/* stage + instrument */
+.stage { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.machine {
+  margin-top: clamp(14px, 2.6vh, 26px);
+  width: min(470px, 94vw, max(280px, 100vh - 560px));
+  display: grid;
+  grid-template-areas: "rail" "board" "score" "deck";
+}
+.rail { grid-area: rail; }
+.board-wrap { grid-area: board; }
+.score { grid-area: score; }
+.deck { grid-area: deck; }
+.deck-pair { display: flex; align-items: flex-end; justify-content: center; gap: 22px; }
+
+/* ── wide screens: the plates bolt into one console ── */
+@media (min-width: 900px) {
+  .machine {
+    margin-top: 0;
+    width: auto;
+    grid-template-columns: var(--board) var(--deckw, 218px);
+    grid-template-rows: auto auto auto;
+    border: 1px solid var(--brass-dark);
+    border-radius: 14px;
+    overflow: hidden;
+    /* walnut backing: tilt edge-reveals and seams read as wood shadow */
+    background: linear-gradient(180deg, #2c2115, #241a11);
+    box-shadow: 0 24px 60px -22px rgba(60, 40, 15, 0.5), 0 2px 0 rgba(0,0,0,0.06);
+  }
+  .machine .rail { border: none; border-bottom: 2px solid #6e5320; border-radius: 0; box-shadow: none; }
+  .machine .board-wrap { border: none; border-radius: 0; box-shadow: none; }
+  .machine .score {
+    margin-top: 0;
+    border-top: 1px solid rgba(36,27,16,0.35);
+    background: rgba(239,231,218,0.92);
+  }
+  .machine .deck {
+    margin-top: 0;
+    border: none;
+    border-left: 1px solid var(--brass-dark);
+    border-radius: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 16px 13px;
+    box-shadow: none;
+  }
+  .machine .deck-slot-block, .machine .deck-spec { flex: none; }
+  .machine .plunger { width: 100%; }
+  .machine .ticket { align-self: stretch; }
+  .machine .ticket-text { flex: 1; justify-content: center; }
+  .machine .mute-wrap { display: flex; }
+}
+
+/* placard beside the machine, like a museum label next to the object */
+@media (min-width: 900px) {
+  .stage {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(28px, 4.5vw, 72px);
+    flex: 1;
+    margin-top: clamp(10px, 2vh, 24px);
+  }
+  .hero { flex: 0 1 320px; margin-top: 0; text-align: left; }
+  .hero .meta {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(36,27,16,0.25);
+    display: inline-block;
+  }
+  .machine {
+    --board: clamp(280px, min(100vh - 282px, 100vw - 620px), 620px);
+    --board: clamp(280px, min(100dvh - 282px, 100vw - 620px), 620px);
+    grid-template-areas: "rail rail" "board deck" "score deck";
+  }
+}
 .rail {
   background: linear-gradient(180deg, #d4ac5e 0%, var(--brass) 45%, #96702a 100%);
   border-radius: 9px 9px 0 0;
@@ -161,7 +237,7 @@ body {
 .score.can-scroll .score-caption { color: var(--ink-soft); }
 @media (max-width: 560px) {
   .score-inner { width: 175%; } /* notes get real spacing on small screens */
-  .instrument { width: min(94vw, max(280px, 100svh - 380px)); }
+  .machine { width: min(94vw, max(280px, 100svh - 380px)); }
 }
 .score-rule {
   position: absolute; left: 0; right: 0; top: 50%;

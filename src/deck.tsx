@@ -75,40 +75,42 @@ export function Deck({
         <span className="plunger-collar" aria-hidden="true" />
       </button>
 
-      <div className="deck-cluster">
-        <button
-          type="button"
-          className="dial"
-          onClick={onTake}
-          disabled={dropping}
-          title="Same song, different fall"
-          aria-label={`Take ${take}. Advance to the next take`}
-        >
-          <span className="dial-face" style={{ transform: `rotate(${take * -40}deg)` }}>
-            <span className="dial-notch" />
-          </span>
-          <span className="dial-num">t{take}</span>
-        </button>
-        <span className="deck-label">take</span>
+      <div className="deck-pair">
+        <div className="deck-cluster">
+          <button
+            type="button"
+            className="dial"
+            onClick={onTake}
+            disabled={dropping}
+            title="Same song, different fall"
+            aria-label={`Take ${take}. Advance to the next take`}
+          >
+            <span className="dial-face" style={{ transform: `rotate(${take * -40}deg)` }}>
+              <span className="dial-notch" />
+            </span>
+            <span className="dial-num">t{take}</span>
+          </button>
+          <span className="deck-label">take</span>
+        </div>
+
+        <span className="mute-wrap">
+          <button
+            type="button"
+            className={`mute ${muted ? 'is-muted' : ''}`}
+            onClick={onMute}
+            aria-label={muted ? 'Unmute' : 'Mute'}
+            aria-pressed={muted}
+          >
+            <span className="mute-dot" />
+          </button>
+          <span className="deck-label">sound</span>
+        </span>
       </div>
 
       <button type="button" className="ticket" onClick={onShare} disabled={dropping} aria-label="Share this song">
         <span className="ticket-perf" aria-hidden="true" />
         <span className="ticket-text">share</span>
       </button>
-
-      <span className="mute-wrap">
-        <button
-          type="button"
-          className={`mute ${muted ? 'is-muted' : ''}`}
-          onClick={onMute}
-          aria-label={muted ? 'Unmute' : 'Mute'}
-          aria-pressed={muted}
-        >
-          <span className="mute-dot" />
-        </button>
-        <span className="deck-label">sound</span>
-      </span>
 
       <div className="deck-spec">{spec}</div>
     </form>
