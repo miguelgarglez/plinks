@@ -4,6 +4,7 @@ import type { DropResult } from './lib/physics';
 import type { Playback } from './playback';
 import { audioEngine } from './playback';
 import { midiName } from './lib/music';
+import { melodyProgress, scrollForProgress } from './lib/scrub';
 import { ramp } from './board';
 
 // ── brass rail: the word stamps in, letter by letter ──
@@ -43,6 +44,7 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
   const revealed = pb.phase === 'settled' ? Infinity : pb.progress * lastT;
 
   const scrubbing = useRef(false);
+  const captId = useRef<number | null>(null);
   const [scrubX, setScrubX] = useState<number | null>(null);
   const rungAt = useRef(new Map<number, number>());
   const lastClient = useRef<{ x: number; y: number } | null>(null);
@@ -62,45 +64,23 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
     return true;
   };
 
-  // every note under the pointer x rings as it passes
+  // Finger x in the visible rail maps across the whole melody, so late notes
+  // stay reachable on a tape wider than the phone. The paper scrolls under.
   const scrubAt = (clientX: number) => {
-    const inner = strip.current?.firstElementChild as HTMLElement | null;
-    if (!inner) return;
-    const rect = inner.getBoundingClientRect();
-    const fx = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+    const rail = strip.current;
+    if (!rail) return;
+    const rr = rail.getBoundingClientRect();
+    const viewU = melodyProgress(clientX, rr.left, rr.width);
+    rail.scrollLeft = scrollForProgress(viewU, rail.scrollWidth, rail.clientWidth);
+    const fx = viewU * 100;
     let hit = false;
     evs.forEach((ev, i) => {
       const ex = 2 + (ev.t / Math.max(lastT, 0.001)) * 96;
-      if (Math.abs(ex - fx) < 2.4 && ring(i)) hit = true;
+      if (Math.abs(ex - fx) < 2.8 && ring(i)) hit = true;
     });
     if (hit) onScrub();
     setScrubX(fx);
   };
-
-  // while scrubbing near an edge the paper keeps gliding on its own
-  const scrubAtRef = useRef(scrubAt);
-  useEffect(() => { scrubAtRef.current = scrubAt; });
-  useEffect(() => {
-    let raf = 0;
-    const tick = () => {
-      const rail = strip.current;
-      const lc = lastClient.current;
-      // downDot held: a still press on a note must not scroll the paper
-      if (rail && lc && scrubbing.current && !downDot.current) {
-        const rr = rail.getBoundingClientRect();
-        const edge = 36;
-        if (lc.x < rr.left + edge || lc.x > rr.right - edge) {
-          const before = rail.scrollLeft;
-          rail.scrollLeft += lc.x < rr.left + edge ? -3.4 : 3.4;
-          // at the scroll limit nothing moved — don't re-ring idle notes
-          if (rail.scrollLeft !== before) scrubAtRef.current(lc.x);
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
 
   const scrubDown = (e: React.PointerEvent<HTMLDivElement>) => {
     // a press that begins on a dot rings exactly that note; the button's
@@ -108,7 +88,11 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
     audioEngine.unlock();
     scrubbing.current = true;
     lastClient.current = { x: e.clientX, y: e.clientY };
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      captId.current = e.pointerId;
+    } catch { /* capture optional */ }
+    e.preventDefault();
     const dotEl = (e.target as HTMLElement).closest('.score-dot');
     const ix = dotEl ? Number((dotEl as HTMLElement).dataset.i) : NaN;
     if (Number.isInteger(ix) && evs[ix]) {
@@ -122,6 +106,7 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
   };
   const scrubMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!scrubbing.current) return;
+    e.preventDefault();
     lastClient.current = { x: e.clientX, y: e.clientY };
     const d = downDot.current;
     if (d) {
@@ -130,7 +115,11 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
     }
     scrubAt(e.clientX);
   };
-  const scrubEnd = () => {
+  const scrubEnd = (e?: React.PointerEvent<HTMLDivElement>) => {
+    if (e && captId.current !== null) {
+      try { e.currentTarget.releasePointerCapture(captId.current); } catch { /* already released */ }
+    }
+    captId.current = null;
     scrubbing.current = false;
     downDot.current = null;
     lastClient.current = null;
@@ -196,6 +185,7 @@ export function ScoreRail({ song, drop, pb, onScrub }: {
         onPointerMove={scrubMove}
         onPointerUp={scrubEnd}
         onPointerCancel={scrubEnd}
+        onLostPointerCapture={() => scrubEnd()}
       >
       <div className="score-rule" />
       {playing && (
