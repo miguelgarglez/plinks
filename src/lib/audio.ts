@@ -1,0 +1,131 @@
+import { KITS, midiToFreq, type KitName } from './music';
+import type { NoteEventLike } from './types';
+
+// Karplus-Strong plucked-string synthesis, rendered into AudioBuffers once per
+// pitch. Plus a generated exponential-decay noise impulse for reverb.
+export class AudioEngine {
+  private ctx: AudioContext | null = null;
+  private master: GainNode | null = null;
+  private wet: ConvolverNode | null = null;
+  private buffers = new Map<string, AudioBuffer>();
+  private kit: KitName = 'kalimba';
+  private _muted = false;
+
+  get muted() { return this._muted; }
+
+  setKit(kit: KitName) {
+    if (kit !== this.kit) { this.kit = kit; this.buffers.clear(); }
+  }
+
+  setMuted(m: boolean) {
+    this._muted = m;
+    if (this.master && this.ctx) this.master.gain.setTargetAtTime(m ? 0 : 0.9, this.ctx.currentTime, 0.01);
+  }
+
+  get ready() { return !!this.ctx; }
+
+  unlock() {
+    if (this.ctx) { if (this.ctx.state === 'suspended') void this.ctx.resume(); return; }
+    const ctx = new AudioContext();
+    this.ctx = ctx;
+    this.master = ctx.createGain();
+    this.master.gain.value = this._muted ? 0 : 0.9;
+    this.master.connect(ctx.destination);
+    this.wet = ctx.createConvolver();
+    this.wet.buffer = this.impulse(1.8, 2.6);
+    const wetGain = ctx.createGain();
+    wetGain.gain.value = 0.32;
+    this.wet.connect(wetGain).connect(this.master);
+  }
+
+  private impulse(dur: number, decay: number): AudioBuffer {
+    const ctx = this.ctx!;
+    const len = Math.floor(ctx.sampleRate * dur);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+      }
+    }
+    return buf;
+  }
+
+  private pluck(midi: number): AudioBuffer {
+    const ctx = this.ctx!;
+    const key = `${this.kit}:${midi}`;
+    const cached = this.buffers.get(key);
+    if (cached) return cached;
+
+    const k = KITS[this.kit];
+    const freq = midiToFreq(midi);
+    const sr = ctx.sampleRate;
+    const dur = Math.min(2.2, k.stretch * 1.4 + 60 / freq);
+    const len = Math.floor(sr * dur);
+    const N = Math.max(2, Math.round(sr / freq));
+
+    const buf = ctx.createBuffer(1, len, sr);
+    const out = buf.getChannelData(0);
+    const line = new Float64Array(N);
+    for (let i = 0; i < N; i++) {
+      const n = Math.random() * 2 - 1;
+      line[i] = n * (i < N * 0.3 ? 1 : k.bright); // brighter attack = more highs
+    }
+    let idx = 0;
+    for (let i = 0; i < len; i++) {
+      const cur = line[idx];
+      const nxt = line[(idx + 1) % N];
+      const v = k.damp * 0.5 * (cur + nxt);
+      line[idx] = v;
+      out[i] = cur;
+      idx = (idx + 1) % N;
+    }
+    // gentle fade tail
+    const fade = Math.floor(sr * 0.06);
+    for (let i = 0; i < fade; i++) out[len - 1 - i] *= i / fade;
+
+    this.buffers.set(key, buf);
+    return buf;
+  }
+
+  strike(midi: number, vel = 0.8, when = 0) {
+    if (!this.ctx || !this.master || !this.wet) return;
+    const ctx = this.ctx;
+    const src = ctx.createBufferSource();
+    src.buffer = this.pluck(midi);
+    const g = ctx.createGain();
+    const t = Math.max(ctx.currentTime, when || ctx.currentTime);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.55 * vel + 0.1, t + 0.004);
+    src.connect(g);
+    g.connect(this.master);
+    const send = ctx.createGain();
+    send.gain.value = 0.9;
+    g.connect(send).connect(this.wet);
+    src.start(t);
+  }
+
+  // wooden knock for basin landing + UI thunks
+  knock(when = 0, freq = 220, gain = 0.4) {
+    if (!this.ctx || !this.master) return;
+    const ctx = this.ctx;
+    const t = Math.max(ctx.currentTime, when || ctx.currentTime);
+    const o = ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(freq, t);
+    o.frequency.exponentialRampToValueAtTime(freq * 0.6, t + 0.08);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(gain, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+    o.connect(g).connect(this.master);
+    o.start(t); o.stop(t + 0.12);
+  }
+
+  // schedule a whole melody; returns scheduled end time
+  playEvents(events: NoteEventLike[], t0: number): number {
+    for (const e of events) this.strike(e.midi, e.vel, t0 + e.tGrid);
+    return t0 + (events.length ? events[events.length - 1].tGrid : 0) + 2.2;
+  }
+
+  now(): number { return this.ctx ? this.ctx.currentTime : 0; }
+}
