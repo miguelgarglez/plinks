@@ -99,6 +99,8 @@ export default function App() {
     const next = Math.min(take + 1, MAX_TAKE);
     history.replaceState(null, '', `/${route.word}?take=${next}`);
     wantDrop.current = true;
+    // prime audio in this gesture — the autoplay start runs in an effect later
+    audioEngine.unlock();
     audioEngine.tick(1500, 0.07); // dial detent
     setTake(next);
     lastActivity.current = performance.now() / 1000;
