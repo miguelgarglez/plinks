@@ -9,7 +9,7 @@ export function OgCard() {
   const drop = simulate(song, 1);
   const evs = drop.events;
   const lastT = evs.length ? evs[evs.length - 1].t : 1;
-  const midis = evs.map(e => e.midi);
+  const midis = song.board.pegs.map(p => p.midi);
   const lo = Math.min(...midis), hi = Math.max(...midis);
 
   return (

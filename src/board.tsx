@@ -189,17 +189,19 @@ function draw(ctx: CanvasRenderingContext2D, W: number, song: Song, pb: Playback
       ctx.shadowBlur = 20 * glow + 8;
       ctx.fillStyle = col;
       ctx.beginPath();
-      ctx.arc(px, py, p.r * S * (1 + glow * 0.9), 0, Math.PI * 2);
+      ctx.arc(px, py, p.r * S * (pb.reduced ? 1.15 : 1 + glow * 0.9), 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
-      const ring = Math.min(1, age * 3.2);
-      ctx.strokeStyle = col;
-      ctx.globalAlpha = (1 - ring) * 0.55;
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.arc(px, py, (p.r + ring * 0.045) * S, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+      if (!pb.reduced) {
+        const ring = Math.min(1, age * 3.2);
+        ctx.strokeStyle = col;
+        ctx.globalAlpha = (1 - ring) * 0.55;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(px, py, (p.r + ring * 0.045) * S, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
     } else {
       // pin: dark base + brass cap + tiny highlight
       ctx.fillStyle = P.pegDark;

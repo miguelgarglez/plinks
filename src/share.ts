@@ -55,7 +55,7 @@ export async function shareCardPng(song: Song, drop: DropResult, take: number): 
   // score rail
   const evs = drop.events;
   const lastT = evs.length ? evs[evs.length - 1].t : 1;
-  const midis = evs.map(e => e.midi);
+  const midis = song.board.pegs.map(p => p.midi);
   const lo = Math.min(...midis), hi = Math.max(...midis);
   const sx0 = 110, sx1 = W - 110, sy = 440, sh = 120;
   ctx.strokeStyle = 'rgba(36,27,16,0.25)';

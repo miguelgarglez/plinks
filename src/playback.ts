@@ -98,7 +98,7 @@ export function usePlayback(song: Song, take: number): Playback {
     let ei = 0; // event cursor — every strike lights its peg, repeats included
     const tick = () => {
       const now = performance.now() / 1000;
-      const ts = now - s.t0;
+      const ts = now - s.t0 - LEAD; // marble, flash, score share the audio clock
       while (si < samples.length - 2 && samples[si + 1].t <= ts) si++;
       const a = samples[si], b = samples[Math.min(si + 1, samples.length - 1)];
       const f = b.t > a.t ? Math.min(1, Math.max(0, (ts - a.t) / (b.t - a.t))) : 1;

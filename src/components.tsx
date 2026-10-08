@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import type { Song } from './lib/song';
 import type { DropResult } from './lib/physics';
 import type { Playback } from './playback';
@@ -8,7 +9,7 @@ import { ramp } from './board';
 // ── brass rail: the word stamps in, letter by letter ──
 export function Rail({ word }: { word: string }) {
   const letters = word.toUpperCase().split('');
-  const stagger = Math.min(75, 480 / letters.length); // whole word lands in ~500ms
+  const stagger = Math.min(75, 80 / Math.max(1, letters.length - 1)); // last letter lands ~500ms in
   return (
     <div className="rail" role="img" aria-label={`The word ${word} stamped in brass`}>
       {letters.map((ch, i) => (
@@ -36,9 +37,41 @@ export function ScoreRail({ song, drop, pb }: { song: Song; drop: DropResult; pb
   const lo = Math.min(...midis), hi = Math.max(...midis);
   const revealed = pb.phase === 'settled' ? Infinity : pb.progress * lastT;
 
+  // taps anywhere on the strip replay the nearest note — forgiving on touch
+  const tapStrip = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget && (e.target as HTMLElement).closest('button')) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const fx = ((e.clientX - rect.left) / rect.width) * 100;
+    let best = -1, bd = Infinity;
+    evs.forEach((ev, i) => {
+      const ex = 2 + (ev.t / Math.max(lastT, 0.001)) * 96;
+      const d = Math.abs(ex - fx);
+      if (d < bd) { bd = d; best = i; }
+    });
+    if (best < 0) return;
+    const ev = evs[best];
+    if (!(pb.phase === 'settled' || ev.t <= revealed + 0.001)) return;
+    audioEngine.unlock();
+    audioEngine.setKit(song.kit);
+    pb.ping(ev.pegId, ev.midi, 0.8);
+  };
+
+  const strip = useRef<HTMLDivElement>(null);
+  const [canScroll, setCanScroll] = useState(false);
+  useEffect(() => {
+    const el = strip.current;
+    if (!el) return;
+    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 4 && el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    check();
+    el.addEventListener('scroll', check);
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', check); ro.disconnect(); };
+  }, [evs.length]);
+
   return (
-    <div className="score" aria-label="The melody as a rail of notes">
-      <div className="score-inner">
+    <div className={`score${canScroll ? ' can-scroll' : ''}`} ref={strip} aria-label="The melody as a rail of notes">
+      <div className="score-inner" onClick={tapStrip}>
       <div className="score-rule" />
       {pb.phase === 'dropping' && (
         <div className="score-playhead" style={{ left: `${2 + pb.progress * 96}%` }} />

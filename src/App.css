@@ -95,7 +95,7 @@ body {
 }
 
 /* instrument */
-.instrument { margin-top: clamp(16px, 3vh, 30px); width: min(470px, 94vw, 58vh); }
+.instrument { margin-top: clamp(16px, 3vh, 30px); width: min(470px, 94vw, max(280px, 100vh - 500px)); }
 .rail {
   background: linear-gradient(180deg, #d4ac5e 0%, var(--brass) 45%, #96702a 100%);
   border-radius: 9px 9px 0 0;
@@ -149,6 +149,13 @@ body {
 }
 .score::-webkit-scrollbar { display: none; }
 .score-inner { position: relative; height: 100%; min-width: 100%; }
+.score.can-scroll::after {
+  content: "";
+  position: absolute; top: 0; right: 0; bottom: 0; width: 44px;
+  background: linear-gradient(90deg, rgba(239,231,218,0), var(--bone));
+  pointer-events: none;
+}
+.score.can-scroll .score-caption { color: var(--ink-soft); }
 @media (max-width: 560px) {
   .score-inner { width: 175%; } /* notes get real spacing on small screens */
 }
@@ -272,6 +279,7 @@ body {
   transform: translateX(-50%);
 }
 .mute.is-muted { transform: rotate(160deg); }
+.mute.is-muted:active { transform: rotate(160deg) scale(0.94); }
 .mute.is-muted::after {
   content: ""; position: absolute; left: 8px; right: 8px; top: 50%;
   height: 2px; background: #3a2c17; transform: translateY(-50%);
@@ -358,6 +366,8 @@ body {
 }
 
 @media (max-width: 560px) {
+  .meta { font-size: 12px; }
+  .btn { font-size: 12px; }
   .mute-tag { font-size: 12px; letter-spacing: 0.14em; }
   .score-caption { font-size: 12px; letter-spacing: 0.1em; }
   .score-hint { font-size: 12px; letter-spacing: 0.1em; }
@@ -366,7 +376,6 @@ body {
   .hero { margin-top: 14px; }
   .epithet { margin-top: 6px; }
   .meta { margin-top: 8px; }
-  .instrument { margin-top: 12px; width: min(470px, 94vw, 46vh); }
   .score { height: 62px; margin-top: 8px; }
   .footer { padding-top: 18px; }
 }
